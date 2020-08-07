@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, Switch, Route, Redirect } from 'react-router-dom';
 import Helmet from 'react-helmet';
 
@@ -8,7 +8,6 @@ import Main from './components/Main';
 
 function App() {
   const { isAuthenticated, logout, user } = useAuth0();
-  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <>
