@@ -10,7 +10,6 @@ import { RepositoryCtxProvider } from './contexts/RepositoryContext';
 
 if (
   process.env.REACT_APP_BACKEND_URL === undefined ||
-  process.env.REACT_APP_LANDING_URL === undefined ||
   process.env.REACT_APP_AUTH0_DOMAIN === undefined ||
   process.env.REACT_APP_AUTH0_CLIENT_ID === undefined ||
   process.env.REACT_APP_AUTH0_AUDIENCE === undefined ||
