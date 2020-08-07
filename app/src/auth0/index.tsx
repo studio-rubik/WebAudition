@@ -57,10 +57,6 @@ export const Auth0Provider = ({
         const domainUser = {
           id: user.sub,
           email: user.email,
-          signUpComplete:
-            user[process.env.REACT_APP_OIDC_NAMESPACE + '/signUpComplete'],
-          signUpTasks:
-            user[process.env.REACT_APP_OIDC_NAMESPACE + '/signUpTasks'],
         };
         setUser(domainUser);
       }

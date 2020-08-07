@@ -10,12 +10,6 @@ function App() {
   const { isAuthenticated, logout, user } = useAuth0();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  if (user?.signUpComplete) {
-    console.log('sign up');
-  } else {
-    console.log(isAuthenticated);
-  }
-
   return (
     <>
       <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
