@@ -29,7 +29,7 @@ class BaseModel(Model):
 
     id = UUIDField(primary_key=True, default=uuid.uuid4)
     created_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
-    modified_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
+    updated_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
 
 
 class Competition(BaseModel):
