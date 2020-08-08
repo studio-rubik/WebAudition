@@ -1,7 +1,8 @@
 import React from 'react';
-import { Link, Switch, Route, Redirect } from 'react-router-dom';
+import styled from 'styled-components';
+import { Link, Switch, Route } from 'react-router-dom';
 import Helmet from 'react-helmet';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu } from 'antd';
 
 import { useAuth0 } from './auth0';
 import Auth from './components/Auth';
@@ -21,9 +22,9 @@ function App() {
   return (
     <>
       <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
-      <Layout className="layout">
-        <Header>
-          <div className="logo" />
+      <Layout>
+        <Header style={{ background: 'white' }}>
+          <Logo>WouldYouPlay?</Logo>
           <div>
             <Menu selectable={false} mode="horizontal" style={centerStyle}>
               <Menu.Item>Nav 1</Menu.Item>
@@ -42,14 +43,16 @@ function App() {
           </div>
         </Header>
         <Content style={{ padding: '0 50px' }}>
-          <Switch>
-            <Route path="/auth">
-              <Auth />
-            </Route>
-            <Route path="/">
-              <Main />
-            </Route>
-          </Switch>
+          <Container>
+            <Switch>
+              <Route path="/auth">
+                <Auth />
+              </Route>
+              <Route path="/">
+                <Main />
+              </Route>
+            </Switch>
+          </Container>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
           © 2020 Studio Rubik, All Rights Reserved
@@ -58,5 +61,20 @@ function App() {
     </>
   );
 }
+
+const Container = styled.div`
+  background: #fff;
+  padding: 24px;
+  min-height: 400px;
+  margin-top: 40px;
+`;
+
+const Logo = styled.div`
+  width: 120px;
+  height: 30px;
+  line-height: 30px;
+  margin: 16px 24px 16px 0;
+  float: left;
+`;
 
 export default App;
