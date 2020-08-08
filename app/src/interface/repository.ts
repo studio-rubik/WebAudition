@@ -7,10 +7,19 @@ export type RepositoryFilter = {
 export type APIResponse<T> = {
   data: T;
   hasMore: boolean;
+  total: number;
+};
+
+export type CompetitionsGetResp = {
+  competitions: Domain.Competition[];
+  applications: Domain.Application[];
 };
 
 export default interface Repository {
   setAuthToken(token: string | null): void;
   verifyEmailResend(): Promise<void>;
-  test(): Promise<string>;
+  competitionsGet(
+    limit: number,
+    offset: number,
+  ): Promise<APIResponse<CompetitionsGetResp>>;
 }

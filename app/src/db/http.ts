@@ -1,4 +1,5 @@
 // Wrapper class of fetch, for convenient request to the backend.
+import camelkeys from 'camelcase-keys';
 
 enum HttpMethod {
   GET = 'GET',
@@ -135,7 +136,8 @@ export default class Http {
     // Convert to json if content-type is matched, else create object with
     // `data` property whose value is plain string.
     if (resp.headers.get(CONTENT_TYPE)?.split(';')[0] === APPLICATION_JSON) {
-      return resp.json();
+      const json = await resp.json();
+      return camelkeys(json, { deep: true }) as any;
     } else {
       const data = await resp.text();
       return { data };

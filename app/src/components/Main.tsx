@@ -3,22 +3,16 @@ import { Switch, Route } from 'react-router-dom';
 
 import { useAuth0 } from '../auth0';
 import useRepository from '../hooks/useRepository';
+import Competitions from './Competitions';
 
 const Main = () => {
   const { isAuthenticated, user } = useAuth0();
-  const repo = useRepository();
-  useEffect(() => {
-    repo.test().then((resp) => {
-      console.log(resp);
-    });
-  }, [repo]);
 
   return (
     <>
       <Switch>
         <Route path={`/`}>
-          <p>Main Contents</p>
-          <p>{`isLogged in: ${isAuthenticated}, userID: ${user?.id}`}</p>
+          <Competitions />
         </Route>
       </Switch>
     </>

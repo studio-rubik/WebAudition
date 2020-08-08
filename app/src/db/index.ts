@@ -1,6 +1,8 @@
-import * as Domain from '../common/Domain';
 import Http from './http';
-import Repository, { RepositoryFilter } from '../interface/repository';
+import Repository, {
+  APIResponse,
+  CompetitionsGetResp,
+} from '../interface/repository';
 
 export default class ServerRepository implements Repository {
   client: Http;
@@ -8,15 +10,22 @@ export default class ServerRepository implements Repository {
   constructor(host: string, port?: number) {
     this.client = new Http(host, port);
   }
+  verifyEmailResend(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+
+  competitionsGet(
+    limit: number,
+    offset: number,
+  ): Promise<APIResponse<CompetitionsGetResp>> {
+    return this.client.get({
+      path: 'competitions',
+      queries: { limit, offset },
+    });
+  }
 
   setAuthToken(token: string | null) {
     this.client.token = token;
-  }
-
-  verifyEmailResend() {
-    return this.client.post({
-      path: 'account/verification-email',
-    });
   }
 
   test() {

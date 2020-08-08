@@ -6,6 +6,7 @@ from playhouse.shortcuts import model_to_dict
 from .app import app
 from .auth import require_auth
 from .deps import s3
+from .utils import make_response
 from . import models
 
 
@@ -24,21 +25,22 @@ def competitions_post():
 
 @app.route("/competitions", methods=["GET"])
 def competitions_get():
-    compets = (
-        models.Competition.select()
-        .join(models.Application)
-        .order_by(models.Competition.modified_at)
-        .paginate(int(request.args.get("page")), int(request.args.get("per_page")))
-    )
-    return (
-        {
-            "competitions": [model_to_dict(compet) for compet in compets],
+    limit = int(request.args.get("limit"))
+    offset = int(request.args.get("offset"))
+    compets = models.Competition.select().order_by(models.Competition.updated_at)
+    total = compets.count()
+    part = compets.limit(limit).offset(offset)
+    has_more = total >= offset + limit + 1
+
+    return make_response(
+        data={
+            "competitions": [model_to_dict(c) for c in part],
             "applications": [
-                [model_to_dict(appl) for appl in compet.applications]
-                for compet in compets
+                [model_to_dict(appl) for appl in c.applications] for c in part
             ],
         },
-        200,
+        has_more=has_more,
+        status=200,
     )
 
 

@@ -9,6 +9,7 @@ export function mapEnumKeys<T, S>(
       return callback(k, i);
     });
 }
+
 export function truncate(str: string, len: number) {
   const pat = new RegExp(`(.{${len + 1}})..+`);
   return str.replace(pat, '$1…');
