@@ -1,6 +1,7 @@
-from flask import request, abort
+from flask import request, abort, g
 from boto3.exceptions import Boto3Error
 from botocore.client import ClientError
+from playhouse.shortcuts import model_to_dict
 
 from .app import app
 from .auth import require_auth
@@ -8,17 +9,66 @@ from .deps import s3
 from . import models
 
 
-@app.route("/", methods=["GET"])
+@app.route("/competitions", methods=["POST"])
 @require_auth
-def test_auth():
-    return {}, 200
-
-
-@app.route("/users", methods=["POST"])
-def users():
+def competitions_post():
     req = request.get_json()
-    user = models.User.create(name=req.get("name"))
-    return {"id": user.id, "name": user.name}, 200
+    resp = models.Competition.create(
+        user_id=g.user.id,
+        title=req.get("title"),
+        requirements=req.get("requirements"),
+        minus_one_url=req.get("minus_one_url"),
+    )
+    return {"competition": model_to_dict(resp)}, 201
+
+
+@app.route("/competitions", methods=["GET"])
+def competitions_get():
+    compets = (
+        models.Competition.select()
+        .join(models.Application)
+        .order_by(models.Competition.modified_at)
+        .paginate(int(request.args.get("page")), int(request.args.get("per_page")))
+    )
+    return (
+        {
+            "competitions": [model_to_dict(compet) for compet in compets],
+            "applications": [
+                [model_to_dict(appl) for appl in compet.applications]
+                for compet in compets
+            ],
+        },
+        200,
+    )
+
+
+@app.route("/competitions/<id>", methods=["GET"])
+def competition_get(id: str):
+    try:
+        compet = models.Competition.get_by_id(id)
+    except models.Competition.DoesNotExist:
+        abort(404)
+
+    return (
+        {
+            "competition": model_to_dict(compet),
+            "applications": [model_to_dict(appl) for appl in compet.applications],
+        },
+        200,
+    )
+
+
+@app.route("/competitions/<compet_id>/applications", methods=["POST"])
+@require_auth
+def application_post(compet_id: str):
+    req = request.get_json()
+    compet = (
+        models.Competition.select().where(models.Competition.id == compet_id).first()
+    )
+    application = models.Application.create(
+        competition=compet, file_url=req.get("file_url"), user_id=g.user.id
+    )
+    return {"application": model_to_dict(application)}, 201
 
 
 @app.route("/files", methods=["POST"])
@@ -37,4 +87,4 @@ def files():
         except Boto3Error:
             abort(500)
 
-    return {}, 200
+    return {}, 201
