@@ -57,6 +57,7 @@ export const Auth0Provider = ({
         const domainUser = {
           id: user.sub,
           email: user.email,
+          name: user.name,
         };
         setUser(domainUser);
       }

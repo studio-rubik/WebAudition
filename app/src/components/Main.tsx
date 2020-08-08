@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import { useAuth0 } from '../auth0';
-import useRepository from '../hooks/useRepository';
 import Competitions from './Competitions';
 
 const Main = () => {
@@ -11,7 +10,7 @@ const Main = () => {
   return (
     <>
       <Switch>
-        <Route path={`/`}>
+        <Route path="/">
           <Competitions />
         </Route>
       </Switch>

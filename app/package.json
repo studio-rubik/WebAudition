@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ant-design/icons": "^4.2.2",
     "@auth0/auth0-spa-js": "^1.6.5",
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/react-fontawesome": "^0.1.11",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^24.0.0",
@@ -15,6 +19,7 @@
     "antd": "^4.5.2",
     "camelcase-keys": "^6.2.2",
     "dotenv-cli": "^3.1.0",
+    "immer": "^7.0.7",
     "limiter": "^1.1.5",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
@@ -22,7 +27,9 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.0",
     "styled-components": "^5.0.1",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "wavesurfer.js": "^4.0.1",
+    "zustand": "^2.2.3"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -51,6 +58,7 @@
   "devDependencies": {
     "@types/react-helmet": "^5.0.15",
     "@types/react-toast-notifications": "^2.4.0",
+    "@types/wavesurfer.js": "^3.3.1",
     "@types/yup": "^0.26.34",
     "@typescript-eslint/eslint-plugin": "^2.24.0",
     "@typescript-eslint/parser": "^2.24.0",

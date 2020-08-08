@@ -10,9 +10,14 @@ export type APIResponse<T> = {
   total: number;
 };
 
+export type APIResponseEntity<T> = {
+  byId: { [id: string]: T };
+  allIds: string[];
+};
+
 export type CompetitionsGetResp = {
-  competitions: Domain.Competition[];
-  applications: Domain.Application[];
+  competitions: APIResponseEntity<Domain.Competition>;
+  applications: APIResponseEntity<Domain.Application>;
 };
 
 export default interface Repository {

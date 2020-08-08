@@ -32,9 +32,17 @@ def competitions_get():
     part = compets.limit(limit).offset(offset)
     has_more = total >= offset + limit + 1
 
+    compets_resp = {"byId": {}, "allIds": []}
+
+    for c in part:
+        d = model_to_dict(c)
+        id = str(d["id"])
+        compets_resp["byId"][id] = d
+        compets_resp["allIds"].append(id)
+
     return make_response(
         data={
-            "competitions": [model_to_dict(c) for c in part],
+            "competitions": compets_resp,
             "applications": [
                 [model_to_dict(appl) for appl in c.applications] for c in part
             ],
