@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Redirect } from 'react-router';
 import { useAuth0 } from '../auth0';
 
 const Auth: React.FC = () => {
@@ -15,6 +16,6 @@ const Auth: React.FC = () => {
     fn();
   }, [loading, isAuthenticated, loginWithRedirect]);
 
-  return <></>;
+  return isAuthenticated ? <Redirect to="/" /> : <></>;
 };
 export default Auth;
