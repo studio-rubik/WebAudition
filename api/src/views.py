@@ -1,16 +1,15 @@
 import typing
+import json
+import uuid
 import itertools
 from flask import request, abort, g
-from boto3.exceptions import Boto3Error
-from botocore.client import ClientError
 from peewee import IntegrityError
-from playhouse.shortcuts import model_to_dict
 
 from .app import app
 from .auth import require_auth
-from .deps import s3
 from .utils import make_response
 from . import models
+from . import storage
 
 
 @app.route("/webhooks/after-signup", methods=["POST"])
@@ -31,11 +30,11 @@ def after_signup():
 
 def get_profile_by_user_id(id: str):
     try:
-        user = models.Profile.get(models.Profile.user_id == id)
+        prof = models.Profile.get(models.Profile.user_id == id)
     except models.Profile.DoesNotExist:
         abort(404)
     else:
-        return make_response(model_to_dict(user), 200)
+        return make_response(prof.to_dict(), 200)
 
 
 @app.route("/profiles/me", methods=["GET"])
@@ -49,19 +48,30 @@ def profile_get(user_id):
     get_profile_by_user_id(user_id)
 
 
+def extract_extension(filename: str):
+    return filename.rsplit(".", 1)[1].lower()
+
+
 @app.route("/competitions", methods=["POST"])
 @require_auth
 def competitions_post():
-    req = request.get_json()
+    req = request.form.get("json")
+    req = json.loads(req)
+    file = request.files.get("minus_one")
+    ext = extract_extension(file.filename)
+    if ext not in ["wav", "mp3", "m4a"]:
+        abort(400)
+    file_key = f"{g.user.id}/{uuid.uuid4()}.{ext}"
+    storage.store_file(file, file_key, "minus-one")
     prof = models.Profile.get(models.Profile.user_id == g.user.id)
     resp = models.Competition.create(
         user_id=g.user.id,
         title=req.get("title"),
         requirements=req.get("requirements"),
-        minus_one_url=req.get("minus_one_url"),
+        minus_one_id=file_key,
         profile=prof,
     )
-    return {"competition": model_to_dict(resp)}, 201
+    return {"competition": resp.to_dict()}, 201
 
 
 class Entity:
@@ -87,17 +97,14 @@ def competitions_get():
     has_more = total >= offset + limit + 1
 
     compets_model = all_compets.limit(limit).offset(offset)
-    compets = [model_to_dict(c, recurse=False) for c in compets_model]
+    compets = [c.to_dict() for c in compets_model]
 
-    appls_nestd = [
-        [model_to_dict(appl, recurse=False) for appl in c.applications]
-        for c in compets_model
-    ]
+    appls_nestd = [[appl.to_dict() for appl in c.applications] for c in compets_model]
     appls = list(itertools.chain(*appls_nestd))
 
     user_ids = set((data["user_id"] for data in itertools.chain(compets, appls)))
     profiles = [
-        model_to_dict(p, recurse=False)
+        p.to_dict()
         for p in models.Profile.select().filter(models.Profile.user_id.in_(user_ids))
     ]
 
@@ -119,10 +126,10 @@ def competition_get(id: str):
     except models.Competition.DoesNotExist:
         abort(404)
 
-    compet = model_to_dict(compet_model, recurse=False)
-    appls = [model_to_dict(appl, recurse=False) for appl in compet_model.applications]
+    compet = compet_model.to_dict()
+    appls = [appl.to_dict() for appl in compet_model.applications]
     prof_model = models.Profile.get_by_id(compet.get("profile"))
-    prof = model_to_dict(prof_model, recurse=False)
+    prof = prof_model.to_dict()
 
     return make_response(
         data={
@@ -147,23 +154,4 @@ def application_post(compet_id: str):
         user_id=g.user.id,
         profile=prof,
     )
-    return {"application": model_to_dict(application)}, 201
-
-
-@app.route("/files", methods=["POST"])
-def files():
-    bucket_name = "files"
-    try:
-        s3.meta.client.head_bucket(Bucket=bucket_name)
-    except ClientError:
-        bucket = s3.create_bucket(Bucket=bucket_name)
-    else:
-        bucket = s3.Bucket(bucket_name)
-
-    for name, file in request.files.items():
-        try:
-            bucket.upload_fileobj(file, file.filename)
-        except Boto3Error:
-            abort(500)
-
-    return {}, 201
+    return {"application": application.to_dict()}, 201

@@ -194,14 +194,12 @@ const CompetitionDescription: React.FC = () => {
     wavesurfer.on('pause', () => {
       setPlayerBtnElem(<FontAwesomeIcon icon={faPlay} />);
     });
-    wavesurfer.load(
-      'http://localhost:9000/audio/Samba.wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minio%2F20200808%2F%2Fs3%2Faws4_request&X-Amz-Date=20200808T125917Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=dfa35c04c404bac9c06127aa80c940c25572d43adab6e71f0ea042bc28c08bb4',
-    );
+    wavesurfer.load(compet.minusOneUrl);
     setPlayer(wavesurfer);
     return () => {
       wavesurfer.destroy();
     };
-  }, [loading]);
+  }, [compet.minusOneUrl, loading]);
 
   const handlePlayerBtnClick = useCallback(() => {
     if (player?.isPlaying()) {
