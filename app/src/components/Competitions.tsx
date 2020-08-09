@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import styled from 'styled-components';
 import { Link, Switch, Route, useParams } from 'react-router-dom';
 import { List, Button, Row, Col, Typography, Divider, Spin } from 'antd';
 import { useStore } from '../store';
@@ -97,22 +98,29 @@ const Competitions = () => {
       dataSource={compets}
       loadMore={loadMore}
       renderItem={(item: domain.Competition) => (
-        <List.Item
-          actions={[
-            <Link key="description" to={`/competitions/${item.id}`}>
-              <FontAwesomeIcon icon={faChevronRight} />
-            </Link>,
-          ]}
-        >
-          <List.Item.Meta
-            title={item.title}
-            description={truncate(item.requirements, 30)}
-          />
-        </List.Item>
+        <ListItem>
+          <Link to={`/competitions/${item.id}`}>
+            <List.Item
+              actions={[<FontAwesomeIcon key="right" icon={faChevronRight} />]}
+            >
+              <List.Item.Meta
+                title={item.title}
+                description={truncate(item.requirements, 30)}
+              />
+            </List.Item>
+          </Link>
+        </ListItem>
       )}
     />
   );
 };
+
+const ListItem = styled.div`
+  border-bottom: 1px solid #f0f0f0;
+  :hover {
+    background: #f6f6f6;
+  }
+`;
 
 const CompetitionDescription: React.FC = () => {
   const { id } = useParams();
