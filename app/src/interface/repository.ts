@@ -16,6 +16,7 @@ export type APIResponseEntity<T> = {
 };
 
 export type CompetitionsGetResp = {
+  profiles: APIResponseEntity<Domain.Profile>;
   competitions: APIResponseEntity<Domain.Competition>;
   applications: APIResponseEntity<Domain.Application>;
 };
@@ -23,6 +24,7 @@ export type CompetitionsGetResp = {
 export default interface Repository {
   setAuthToken(token: string | null): void;
   verifyEmailResend(): Promise<void>;
+  competitionGet(id: string): Promise<APIResponse<CompetitionsGetResp>>;
   competitionsGet(
     limit: number,
     offset: number,

@@ -32,19 +32,27 @@ class BaseModel(Model):
     updated_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
 
 
+class Profile(BaseModel):
+    name = CharField()
+    avatar = TextField()
+    user_id = CharField(unique=True)
+
+
 class Competition(BaseModel):
     title = CharField()
     requirements = TextField()
     minus_one_url = TextField()
     user_id = CharField()
+    profile = ForeignKeyField(Profile)
 
 
 class Application(BaseModel):
     competition = ForeignKeyField(Competition, backref="applications")
     file_url = TextField()
     user_id = CharField()
+    profile = ForeignKeyField(Profile)
 
 
 def create_tables():
     with db:
-        db.create_tables([Competition, Application])
+        db.create_tables([Profile, Competition, Application])

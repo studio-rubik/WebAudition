@@ -14,6 +14,10 @@ export default class ServerRepository implements Repository {
     throw new Error('Method not implemented.');
   }
 
+  competitionGet(id: string): Promise<APIResponse<CompetitionsGetResp>> {
+    return this.client.get({ path: 'competitions/:id', params: [id] });
+  }
+
   competitionsGet(
     limit: number,
     offset: number,

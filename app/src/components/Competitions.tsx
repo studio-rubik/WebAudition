@@ -45,11 +45,22 @@ const Competitions = () => {
       setLoading(true);
       const resp = await repo.competitionsGet(LIMIT, compets.length);
       set((store) => {
+        store.profiles = {
+          byId: { ...store.profiles.byId, ...resp.data.profiles.byId },
+          allIds: [...store.profiles.allIds, ...resp.data.profiles.allIds],
+        };
         store.competitions = {
           byId: { ...store.competitions.byId, ...resp.data.competitions.byId },
           allIds: [
             ...store.competitions.allIds,
             ...resp.data.competitions.allIds,
+          ],
+        };
+        store.applications = {
+          byId: { ...store.applications.byId, ...resp.data.applications.byId },
+          allIds: [
+            ...store.applications.allIds,
+            ...resp.data.applications.allIds,
           ],
         };
       });
@@ -106,14 +117,61 @@ const Competitions = () => {
 const CompetitionDescription: React.FC = () => {
   const { id } = useParams();
   const compet = useStore((store) => store.competitions.byId[id ?? '']);
+  const profile = useStore(
+    (store) => store.profiles.byId[compet?.profile ?? ''],
+  );
+  const appls = useStore((store) =>
+    store.applications.allIds
+      .map((id) => store.applications.byId[id])
+      .filter((a) => a.competition === compet.id),
+  );
   const ref = useRef<HTMLDivElement>(null);
   const [player, setPlayer] = useState<WaveSurfer | null>(null);
   const [playerBtnElem, setPlayerBtnElem] = useState<React.ReactElement>(
     <Spin />,
   );
 
+  const set = useStore((store) => store.set);
+  const [loading, setLoading] = useState(true);
+  const repo = useRepository();
+
+  const fetchCompet = useCallback(async () => {
+    if (compet != null || id == null) return;
+    setLoading(true);
+    const resp = await repo.competitionGet(id);
+    set((store) => {
+      store.profiles = {
+        byId: { ...store.profiles.byId, ...resp.data.profiles.byId },
+        allIds: [...store.profiles.allIds, ...resp.data.profiles.allIds],
+      };
+      store.competitions = {
+        byId: { ...store.competitions.byId, ...resp.data.competitions.byId },
+        allIds: [
+          ...store.competitions.allIds,
+          ...resp.data.competitions.allIds,
+        ],
+      };
+      store.applications = {
+        byId: { ...store.applications.byId, ...resp.data.applications.byId },
+        allIds: [
+          ...store.applications.allIds,
+          ...resp.data.applications.allIds,
+        ],
+      };
+    });
+    setLoading(false);
+  }, [compet, id, repo, set]);
+
   useEffect(() => {
-    if (ref.current == null) return;
+    if (compet == null) {
+      fetchCompet();
+    } else {
+      setLoading(false);
+    }
+  }, [compet, fetchCompet]);
+
+  useEffect(() => {
+    if (loading || ref.current == null) return;
     const wavesurfer = WaveSurfer.create({
       container: ref.current,
       barWidth: 2,
@@ -135,7 +193,7 @@ const CompetitionDescription: React.FC = () => {
     return () => {
       wavesurfer.destroy();
     };
-  }, []);
+  }, [loading]);
 
   const handlePlayerBtnClick = useCallback(() => {
     if (player?.isPlaying()) {
@@ -145,7 +203,7 @@ const CompetitionDescription: React.FC = () => {
     }
   }, [player]);
 
-  return (
+  return !loading ? (
     <>
       <Row justify="center">
         <Col>
@@ -153,7 +211,7 @@ const CompetitionDescription: React.FC = () => {
         </Col>
       </Row>
       <Row justify="end">
-        <Col>Miles Davis</Col>
+        <Col>{profile.name}</Col>
       </Row>
       <Row justify="end">
         <Col>{compet.updatedAt}</Col>
@@ -173,6 +231,8 @@ const CompetitionDescription: React.FC = () => {
         </Col>
       </Row>
     </>
+  ) : (
+    <Spin />
   );
 };
 

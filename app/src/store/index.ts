@@ -6,18 +6,18 @@ import { APIResponseEntity } from '../interface/repository';
 
 export type State = {
   set: (fn: SetState) => void;
+  profiles: APIResponseEntity<domain.Profile>;
   competitions: APIResponseEntity<domain.Competition>;
   applications: APIResponseEntity<domain.Application>;
 };
 
 type SetState = (state: State) => void;
 
-function emptyEntity() {
-  return { byId: {}, allIds: [] };
-}
+const emptyEntity = { byId: {}, allIds: [] };
 
 export const [useStore, api] = create<State>((setState, getState) => ({
   set: (fn) => setState(produce(fn)),
-  competitions: emptyEntity(),
-  applications: emptyEntity(),
+  profiles: emptyEntity,
+  competitions: emptyEntity,
+  applications: emptyEntity,
 }));
