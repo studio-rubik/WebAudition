@@ -5,6 +5,7 @@ import { List, Button, Row, Col, Typography, Divider, Spin } from 'antd';
 import { useStore } from '../store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { useAuth0 } from '../auth0';
 
 import * as domain from '../common/Domain';
 import { truncate, unique } from '../common/utils';
@@ -36,6 +37,7 @@ const CompetitionsRoute: React.FC = () => {
 const LIMIT = 5;
 
 const Competitions = () => {
+  const { isAuthenticated } = useAuth0();
   const compets = useStore((store) =>
     store.competitions.allIds.map((id) => store.competitions.byId[id]),
   );
@@ -133,9 +135,15 @@ const Competitions = () => {
           <Typography.Title level={4}>
             Would you play any below?
           </Typography.Title>
-          <Button type="primary">
-            <Link to="/competitions/submit">Submit</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button type="primary">
+              <Link to="/competitions/submit">Submit</Link>
+            </Button>
+          ) : (
+            <Button type="primary">
+              <Link to="/auth">Sign up to submit</Link>
+            </Button>
+          )}
         </ListHeader>
       }
     />
@@ -155,6 +163,7 @@ const ListHeader = styled.div`
 `;
 
 const CompetitionDetail: React.FC = () => {
+  const { isAuthenticated } = useAuth0();
   const { id } = useParams();
   const compet = useStore((store) => store.competitions.byId[id ?? '']);
   const profile = useStore(
@@ -251,9 +260,17 @@ const CompetitionDetail: React.FC = () => {
             header={
               <ListHeader>
                 <Typography.Title level={4}>Played tracks</Typography.Title>
-                <Button type="primary">
-                  <Link to="/competitions/submit">Submit</Link>
-                </Button>
+                {isAuthenticated ? (
+                  <Button type="primary">
+                    <Link to={`/applications/submit?for=${compet.id}`}>
+                      Submit
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button type="primary">
+                    <Link to="/auth">Sign up to submit</Link>
+                  </Button>
+                )}
               </ListHeader>
             }
           />

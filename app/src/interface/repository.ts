@@ -29,7 +29,6 @@ export default interface Repository {
     limit: number,
     offset: number,
   ): Promise<APIResponse<CompetitionsGetResp>>;
-
   competitionPost(
     data: {
       title: string;
@@ -37,4 +36,5 @@ export default interface Repository {
     },
     file: File,
   ): Promise<void>;
+  applicationPost(file: File, competitionId: string): Promise<void>;
 }

@@ -46,11 +46,18 @@ export default class ServerRepository implements Repository {
     });
   }
 
-  setAuthToken(token: string | null) {
-    this.client.token = token;
+  applicationPost(file: File, competitionId: string): Promise<void> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.client.post(
+      {
+        path: `competitions/${competitionId}/applications`,
+      },
+      fd,
+    );
   }
 
-  test() {
-    return this.client.get({ path: '' });
+  setAuthToken(token: string | null) {
+    this.client.token = token;
   }
 }
