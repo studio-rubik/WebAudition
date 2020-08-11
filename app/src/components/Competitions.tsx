@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Link, Switch, Route, useParams } from 'react-router-dom';
 import { List, Button, Row, Col, Typography, Divider, Spin } from 'antd';
@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 import * as domain from '../common/Domain';
-import { truncate } from '../common/utils';
+import { truncate, unique } from '../common/utils';
 import useRepository from '../hooks/useRepository';
 import CompetitionsSubmit from './CompetitionsSubmit';
 import AudioPlayer from './AudioPlayer';
@@ -33,7 +33,7 @@ const CompetitionsRoute: React.FC = () => {
   );
 };
 
-const LIMIT = 10;
+const LIMIT = 5;
 
 const Competitions = () => {
   const compets = useStore((store) =>
@@ -41,37 +41,51 @@ const Competitions = () => {
   );
   const set = useStore((store) => store.set);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const repo = useRepository();
+  const directEntry = useStore((store) => store.directEntry);
+  const initStore = useStore((store) => store.initialize);
 
   const fetchCompets = useCallback(async () => {
-    if (hasMore) {
+    if (compets.length === 0 || hasMore) {
       setLoading(true);
       const resp = await repo.competitionsGet(LIMIT, compets.length);
       set((store) => {
         store.profiles = {
           byId: { ...store.profiles.byId, ...resp.data.profiles.byId },
-          allIds: [...store.profiles.allIds, ...resp.data.profiles.allIds],
+          allIds: unique([
+            ...store.profiles.allIds,
+            ...resp.data.profiles.allIds,
+          ]),
         };
         store.competitions = {
           byId: { ...store.competitions.byId, ...resp.data.competitions.byId },
-          allIds: [
+          allIds: unique([
             ...store.competitions.allIds,
             ...resp.data.competitions.allIds,
-          ],
+          ]),
         };
         store.applications = {
           byId: { ...store.applications.byId, ...resp.data.applications.byId },
-          allIds: [
+          allIds: unique([
             ...store.applications.allIds,
             ...resp.data.applications.allIds,
-          ],
+          ]),
         };
       });
       setHasMore(resp.hasMore);
       setLoading(false);
     }
   }, [compets.length, hasMore, repo, set]);
+
+  useEffect(() => {
+    if (directEntry) {
+      initStore();
+      set((store) => {
+        store.directEntry = false;
+      });
+    }
+  }, [directEntry, initStore, set]);
 
   useEffect(() => {
     if (compets.length === 0) {
@@ -151,9 +165,6 @@ const CompetitionDescription: React.FC = () => {
       .map((id) => store.applications.byId[id])
       .filter((a) => a.competition === compet.id),
   );
-  const ids = useStore((store) => store.applications.allIds);
-  console.log(ids);
-
   const set = useStore((store) => store.set);
   const [loading, setLoading] = useState(true);
   const repo = useRepository();
@@ -163,6 +174,7 @@ const CompetitionDescription: React.FC = () => {
     setLoading(true);
     const resp = await repo.competitionGet(id);
     set((store) => {
+      store.directEntry = true;
       store.profiles = {
         byId: { ...store.profiles.byId, ...resp.data.profiles.byId },
         allIds: [...store.profiles.allIds, ...resp.data.profiles.allIds],
@@ -192,8 +204,6 @@ const CompetitionDescription: React.FC = () => {
       setLoading(false);
     }
   }, [compet, fetchCompet]);
-
-  console.log(appls);
 
   return !loading ? (
     <>
