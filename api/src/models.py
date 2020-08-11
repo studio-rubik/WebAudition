@@ -69,7 +69,7 @@ class Application(BaseModel):
     def file_url(self):
         from . import storage
 
-        return storage.build_public_link(self.file_id, "application-files")
+        return storage.build_public_link(self.file_id, "application-file")
 
     def to_dict(self):
         return model_to_dict(self, recurse=False, extra_attrs=["file_url"])

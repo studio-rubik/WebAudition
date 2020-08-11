@@ -91,7 +91,9 @@ def competitions_get():
     limit = int(request.args.get("limit"))
     offset = int(request.args.get("offset"))
 
-    all_compets = models.Competition.select().order_by(models.Competition.updated_at)
+    all_compets = models.Competition.select().order_by(
+        models.Competition.updated_at.desc()
+    )
 
     total = all_compets.count()
     has_more = total >= offset + limit + 1
@@ -99,7 +101,13 @@ def competitions_get():
     compets_model = all_compets.limit(limit).offset(offset)
     compets = [c.to_dict() for c in compets_model]
 
-    appls_nestd = [[appl.to_dict() for appl in c.applications] for c in compets_model]
+    appls_nestd = [
+        [
+            appl.to_dict()
+            for appl in c.applications.order_by(models.Application.updated_at.desc())
+        ]
+        for c in compets_model
+    ]
     appls = list(itertools.chain(*appls_nestd))
 
     user_ids = set((data["user_id"] for data in itertools.chain(compets, appls)))
@@ -127,7 +135,12 @@ def competition_get(id: str):
         abort(404)
 
     compet = compet_model.to_dict()
-    appls = [appl.to_dict() for appl in compet_model.applications]
+    appls = [
+        appl.to_dict()
+        for appl in compet_model.applications.order_by(
+            models.Application.updated_at.desc()
+        )
+    ]
     prof_model = models.Profile.get_by_id(compet.get("profile"))
     prof = prof_model.to_dict()
 
@@ -145,13 +158,15 @@ def competition_get(id: str):
 @app.route("/competitions/<compet_id>/applications", methods=["POST"])
 @require_auth
 def application_post(compet_id: str):
-    req = request.get_json()
     compet = models.Competition.get_by_id(compet_id)
+    file = request.files.get("file")
+    ext = extract_extension(file.filename)
+    if ext not in ["wav", "mp3", "m4a"]:
+        abort(400)
+    file_key = f"{g.user.id}/{uuid.uuid4()}.{ext}"
+    storage.store_file(file, file_key, "application-file")
     prof = models.Profile.get(models.Profile.user_id == g.user.id)
     application = models.Application.create(
-        competition=compet,
-        file_url=req.get("file_url"),
-        user_id=g.user.id,
-        profile=prof,
+        competition=compet, file_id=file_key, user_id=g.user.id, profile=prof,
     )
     return {"application": application.to_dict()}, 201
