@@ -26,7 +26,7 @@ const CompetitionsRoute: React.FC = () => {
           <CompetitionsSubmit />
         </Route>
         <Route path={`/competitions/:id`}>
-          <CompetitionDescription />
+          <CompetitionDetail />
         </Route>
       </Switch>
     </>
@@ -154,7 +154,7 @@ const ListHeader = styled.div`
   justify-content: space-between;
 `;
 
-const CompetitionDescription: React.FC = () => {
+const CompetitionDetail: React.FC = () => {
   const { id } = useParams();
   const compet = useStore((store) => store.competitions.byId[id ?? '']);
   const profile = useStore(
