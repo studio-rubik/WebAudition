@@ -1,7 +1,8 @@
-import React from 'react';
-import { Button, Form, Upload } from 'antd';
+import React, { useState } from 'react';
+import { Button, Form, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import useRepository from '../hooks/useRepository';
 
@@ -9,21 +10,26 @@ const validateMessages = {
   required: '${label} is required.',
 };
 
-const dummyRequest = ({ file, onSuccess }: { file: File; onSuccess: any }) => {
+const dummyRequest = ({ onSuccess }: { file: File; onSuccess: any }) => {
   setTimeout(() => {
     onSuccess('ok');
   }, 0);
 };
 
-const ApplicationsSubmit: React.FC<any> = (props) => {
+const ApplicationsSubmit: React.FC<any> = () => {
   const repo = useRepository();
   const location = useLocation();
+  const history = useHistory();
   const competitionId = new URLSearchParams(location.search).get('for');
+  const [sending, setSending] = useState(false);
 
   const onFinish = async (values: any) => {
     if (competitionId == null) return;
     const file = values.file[0].originFileObj;
+    setSending(true);
     await repo.applicationPost(file, competitionId);
+    message.success('Your application is sent!');
+    history.push(`/competitions/${competitionId}`);
   };
 
   const normFile = (e: any) => {
@@ -64,7 +70,12 @@ const ApplicationsSubmit: React.FC<any> = (props) => {
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button
+          type="primary"
+          htmlType="submit"
+          disabled={sending}
+          loading={sending}
+        >
           Submit
         </Button>
       </Form.Item>
