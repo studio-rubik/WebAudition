@@ -41,13 +41,13 @@ const Competitions = () => {
   );
   const set = useStore((store) => store.set);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const repo = useRepository();
   const directEntry = useStore((store) => store.directEntry);
   const initStore = useStore((store) => store.initialize);
 
   const fetchCompets = useCallback(async () => {
-    if (compets.length === 0 || hasMore) {
+    if (hasMore) {
       setLoading(true);
       const resp = await repo.competitionsGet(LIMIT, compets.length);
       set((store) => {
