@@ -18,6 +18,24 @@ export default class ServerRepository implements Repository {
     return this.client.get({ path: 'competitions/:id', params: [id] });
   }
 
+  competitionPost(
+    data: {
+      title: string;
+      requirements: string;
+    },
+    file: File,
+  ): Promise<void> {
+    const fd = new FormData();
+    fd.append('json', JSON.stringify(data));
+    fd.append('minus_one', file);
+    return this.client.post(
+      {
+        path: 'competitions',
+      },
+      fd,
+    );
+  }
+
   competitionsGet(
     limit: number,
     offset: number,

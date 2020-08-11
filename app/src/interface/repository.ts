@@ -29,4 +29,12 @@ export default interface Repository {
     limit: number,
     offset: number,
   ): Promise<APIResponse<CompetitionsGetResp>>;
+
+  competitionPost(
+    data: {
+      title: string;
+      requirements: string;
+    },
+    file: File,
+  ): Promise<void>;
 }

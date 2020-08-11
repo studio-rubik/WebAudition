@@ -14,6 +14,7 @@ import {
 import * as domain from '../common/Domain';
 import { truncate } from '../common/utils';
 import useRepository from '../hooks/useRepository';
+import CompetitionsSubmit from './CompetitionsSubmit';
 
 const CompetitionsRoute: React.FC = () => {
   return (
@@ -21,6 +22,12 @@ const CompetitionsRoute: React.FC = () => {
       <Switch>
         <Route exact path="/">
           <Competitions />
+        </Route>
+        <Route exact path="/competitions">
+          <Competitions />
+        </Route>
+        <Route exact path="/competitions/submit">
+          <CompetitionsSubmit />
         </Route>
         <Route path={`/competitions/:id`}>
           <CompetitionDescription />
@@ -111,6 +118,16 @@ const Competitions = () => {
           </Link>
         </ListItem>
       )}
+      header={
+        <ListHeader>
+          <Typography.Title level={4}>
+            Would you play any below?
+          </Typography.Title>
+          <Button type="primary">
+            <Link to="/competitions/submit">Submit</Link>
+          </Button>
+        </ListHeader>
+      }
     />
   );
 };
@@ -120,6 +137,11 @@ const ListItem = styled.div`
   :hover {
     background: #f6f6f6;
   }
+`;
+
+const ListHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 const CompetitionDescription: React.FC = () => {
