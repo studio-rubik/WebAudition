@@ -24,7 +24,9 @@ function App() {
       <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
       <Layout>
         <Header style={{ background: 'white' }}>
-          <Logo>WouldYouPlay?</Logo>
+          <Logo>
+            <Link to="/">WouldYouPlay?</Link>
+          </Logo>
           <div>
             <Menu selectable={false} mode="horizontal" style={centerStyle}>
               <Menu.Item>Nav 1</Menu.Item>

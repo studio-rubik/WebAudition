@@ -3,18 +3,14 @@ import styled from 'styled-components';
 import { Link, Switch, Route, useParams } from 'react-router-dom';
 import { List, Button, Row, Col, Typography, Divider, Spin } from 'antd';
 import { useStore } from '../store';
-import WaveSurfer from 'wavesurfer.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faPlay,
-  faPause,
-  faChevronRight,
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 import * as domain from '../common/Domain';
 import { truncate } from '../common/utils';
 import useRepository from '../hooks/useRepository';
 import CompetitionsSubmit from './CompetitionsSubmit';
+import AudioPlayer from './AudioPlayer';
 
 const CompetitionsRoute: React.FC = () => {
   return (
@@ -155,11 +151,8 @@ const CompetitionDescription: React.FC = () => {
       .map((id) => store.applications.byId[id])
       .filter((a) => a.competition === compet.id),
   );
-  const ref = useRef<HTMLDivElement>(null);
-  const [player, setPlayer] = useState<WaveSurfer | null>(null);
-  const [playerBtnElem, setPlayerBtnElem] = useState<React.ReactElement>(
-    <Spin />,
-  );
+  const ids = useStore((store) => store.applications.allIds);
+  console.log(ids);
 
   const set = useStore((store) => store.set);
   const [loading, setLoading] = useState(true);
@@ -200,36 +193,7 @@ const CompetitionDescription: React.FC = () => {
     }
   }, [compet, fetchCompet]);
 
-  useEffect(() => {
-    if (loading || ref.current == null) return;
-    const wavesurfer = WaveSurfer.create({
-      container: ref.current,
-      barWidth: 2,
-      barHeight: 1,
-    });
-    wavesurfer.on('ready', () => {
-      setPlayerBtnElem(<FontAwesomeIcon icon={faPlay} />);
-    });
-    wavesurfer.on('play', () => {
-      setPlayerBtnElem(<FontAwesomeIcon icon={faPause} />);
-    });
-    wavesurfer.on('pause', () => {
-      setPlayerBtnElem(<FontAwesomeIcon icon={faPlay} />);
-    });
-    wavesurfer.load(compet.minusOneUrl);
-    setPlayer(wavesurfer);
-    return () => {
-      wavesurfer.destroy();
-    };
-  }, [compet.minusOneUrl, loading]);
-
-  const handlePlayerBtnClick = useCallback(() => {
-    if (player?.isPlaying()) {
-      player?.pause();
-    } else {
-      player?.play();
-    }
-  }, [player]);
+  console.log(appls);
 
   return !loading ? (
     <>
@@ -246,16 +210,43 @@ const CompetitionDescription: React.FC = () => {
       </Row>
       <Divider />
       <Row justify="center">
-        <div style={{ width: '100%' }} ref={ref} />
-      </Row>
-      <Row justify="center">
-        <Button onClick={handlePlayerBtnClick}>{playerBtnElem}</Button>
+        <AudioPlayer audioUrl={compet.minusOneUrl} />
       </Row>
       <Divider />
       <Typography.Title level={3}>Requirements:</Typography.Title>
       <Row justify="center">
-        <Col>
+        <Col span={23}>
           <Typography.Paragraph>{compet.requirements}</Typography.Paragraph>
+        </Col>
+      </Row>
+      <Divider />
+      <Row>
+        <Col span={24}>
+          <List
+            bordered
+            pagination={{
+              onChange: (page) => {
+                console.log(page);
+              },
+              pageSize: 5,
+            }}
+            dataSource={appls}
+            renderItem={(item: domain.Application) => (
+              <List.Item
+                actions={[<span key="user">{`by ${profile.name}`}</span>]}
+              >
+                <AudioPlayer audioUrl={item.fileUrl} />
+              </List.Item>
+            )}
+            header={
+              <ListHeader>
+                <Typography.Title level={4}>Played tracks</Typography.Title>
+                <Button type="primary">
+                  <Link to="/competitions/submit">Submit</Link>
+                </Button>
+              </ListHeader>
+            }
+          />
         </Col>
       </Row>
     </>
