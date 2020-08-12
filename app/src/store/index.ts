@@ -10,7 +10,9 @@ export type State = {
   directEntry: boolean;
   profiles: APIResponseEntity<domain.Profile>;
   competitions: APIResponseEntity<domain.Competition>;
+  competitionFiles: APIResponseEntity<domain.CompetitionFile>;
   applications: APIResponseEntity<domain.Application>;
+  applicationFiles: APIResponseEntity<domain.ApplicationFile>;
 };
 
 type SetState = (state: State) => void;
@@ -20,7 +22,9 @@ const emptyEntity = { byId: {}, allIds: [] };
 const initialState = {
   profiles: emptyEntity,
   competitions: emptyEntity,
+  competitionFiles: emptyEntity,
   applications: emptyEntity,
+  applicationFiles: emptyEntity,
 };
 
 export const [useStore, api] = create<State>((setState, getState) => ({

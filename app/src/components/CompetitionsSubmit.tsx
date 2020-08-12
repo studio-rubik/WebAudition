@@ -18,24 +18,19 @@ const CompetitionsSubmit: React.FC = () => {
   const repo = useRepository();
 
   const onFinish = async (values: any) => {
-    console.log(values);
     const data = {
       title: values.title,
       requirements: values.requirements,
     };
-    const file = values.minusOne[0].originFileObj;
-    await repo.competitionPost(data, file);
+    const files = values.files.map((f: any) => f.originFileObj);
+    await repo.competitionPost(data, files);
   };
 
   const normFile = (e: any) => {
-    switch (e.file.status) {
-      case 'uploading':
-        return [e.file];
-      case 'done':
-        return [e.file];
-      default:
-        return [];
+    if (Array.isArray(e)) {
+      return e;
     }
+    return e && e.fileList;
   };
 
   return (
@@ -57,7 +52,7 @@ const CompetitionsSubmit: React.FC = () => {
       </Form.Item>
       <Form.Item label="Minus one track">
         <Form.Item
-          name="minusOne"
+          name="files"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           noStyle

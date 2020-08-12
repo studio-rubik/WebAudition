@@ -1,6 +1,5 @@
 import typing
 import json
-import uuid
 import itertools
 from flask import request, abort, g
 from peewee import IntegrityError
@@ -57,21 +56,20 @@ def extract_extension(filename: str):
 def competitions_post():
     req = request.form.get("json")
     req = json.loads(req)
-    file = request.files.get("minus_one")
-    ext = extract_extension(file.filename)
-    if ext not in ["wav", "mp3", "m4a"]:
-        abort(400)
-    file_key = f"{g.user.id}/{uuid.uuid4()}.{ext}"
-    storage.store_file(file, file_key, "minus-one")
+
     prof = models.Profile.get(models.Profile.user_id == g.user.id)
-    resp = models.Competition.create(
+    compet = models.Competition.create(
         user_id=g.user.id,
         title=req.get("title"),
         requirements=req.get("requirements"),
-        minus_one_id=file_key,
         profile=prof,
     )
-    return {"competition": resp.to_dict()}, 201
+    for _, file in request.files.items():
+        file_key = f"{compet.id}/{file.filename}"
+        models.CompetitionFile.create(key=file_key, competition=compet)
+        storage.store_file(file, file_key, "competitions")
+
+    return {"competition": compet.to_dict()}, 201
 
 
 class Entity:
@@ -101,16 +99,16 @@ def competitions_get():
     compets_model = all_compets.limit(limit).offset(offset)
     compets = [c.to_dict() for c in compets_model]
 
-    appls_nestd = [
+    compet_files_nested = [
         [
-            appl.to_dict()
-            for appl in c.applications.order_by(models.Application.updated_at.desc())
+            file.to_dict()
+            for file in c.files.order_by(models.CompetitionFile.updated_at.asc())
         ]
         for c in compets_model
     ]
-    appls = list(itertools.chain(*appls_nestd))
+    compet_files = list(itertools.chain(*compet_files_nested))
 
-    user_ids = set((data["user_id"] for data in itertools.chain(compets, appls)))
+    user_ids = set((data["user_id"] for data in compets))
     profiles = [
         p.to_dict()
         for p in models.Profile.select().filter(models.Profile.user_id.in_(user_ids))
@@ -119,7 +117,7 @@ def competitions_get():
     return make_response(
         data={
             "competitions": Entity(compets).to_dict(),
-            "applications": Entity(appls).to_dict(),
+            "competition_files": Entity(compet_files).to_dict(),
             "profiles": Entity(profiles).to_dict(),
         },
         has_more=has_more,
@@ -135,19 +133,19 @@ def competition_get(id: str):
         abort(404)
 
     compet = compet_model.to_dict()
-    appls = [
-        appl.to_dict()
-        for appl in compet_model.applications.order_by(
-            models.Application.updated_at.desc()
-        )
+
+    compet_files = [
+        file.to_dict()
+        for file in compet_model.files.order_by(models.CompetitionFile.updated_at.asc())
     ]
+
     prof_model = models.Profile.get_by_id(compet.get("profile"))
     prof = prof_model.to_dict()
 
     return make_response(
         data={
             "competitions": Entity([compet]).to_dict(),
-            "applications": Entity(appls).to_dict(),
+            "competition_files": Entity(compet_files).to_dict(),
             "profiles": Entity([prof]).to_dict(),
         },
         has_more=False,
@@ -157,16 +155,21 @@ def competition_get(id: str):
 
 @app.route("/competitions/<compet_id>/applications", methods=["POST"])
 @require_auth
+def applications_get(compet_id: str):
+    pass
+
+
+@app.route("/competitions/<compet_id>/applications", methods=["POST"])
+@require_auth
 def application_post(compet_id: str):
     compet = models.Competition.get_by_id(compet_id)
-    file = request.files.get("file")
-    ext = extract_extension(file.filename)
-    if ext not in ["wav", "mp3", "m4a"]:
-        abort(400)
-    file_key = f"{g.user.id}/{uuid.uuid4()}.{ext}"
-    storage.store_file(file, file_key, "application-file")
     prof = models.Profile.get(models.Profile.user_id == g.user.id)
-    application = models.Application.create(
-        competition=compet, file_id=file_key, user_id=g.user.id, profile=prof,
+    appl = models.Application.create(
+        competition=compet, user_id=g.user.id, profile=prof,
     )
-    return {"application": application.to_dict()}, 201
+    for _, file in request.files.items():
+        file_key = f"{appl.id}/{file.filename}"
+        models.ApplicationFile.create(key=file_key, application=appl)
+        storage.store_file(file, file_key, "applications")
+
+    return {"application": appl.to_dict()}, 201

@@ -45,36 +45,45 @@ class Profile(BaseModel):
 class Competition(BaseModel):
     title = CharField()
     requirements = TextField()
-    minus_one_id = CharField()
     user_id = CharField()
     profile = ForeignKeyField(Profile)
-
-    @property
-    def minus_one_url(self):
-        from . import storage
-
-        return storage.build_public_link(self.minus_one_id, "minus-one")
-
-    def to_dict(self):
-        return model_to_dict(self, recurse=False, extra_attrs=["minus_one_url"])
 
 
 class Application(BaseModel):
     competition = ForeignKeyField(Competition, backref="applications")
-    file_id = CharField()
     user_id = CharField()
     profile = ForeignKeyField(Profile)
 
-    @property
-    def file_url(self):
-        from . import storage
 
-        return storage.build_public_link(self.file_id, "application-file")
+class File(BaseModel):
+    key = CharField()
 
     def to_dict(self):
-        return model_to_dict(self, recurse=False, extra_attrs=["file_url"])
+        return model_to_dict(self, recurse=False, extra_attrs=["url"])
+
+
+class CompetitionFile(File):
+    competition = ForeignKeyField(Competition, backref="files")
+
+    @property
+    def url(self):
+        from . import storage
+
+        return storage.build_public_link(self.key, "competitions")
+
+
+class ApplicationFile(File):
+    application = ForeignKeyField(Application, backref="files")
+
+    @property
+    def url(self):
+        from . import storage
+
+        return storage.build_public_link(self.key, "applications")
 
 
 def create_tables():
     with db:
-        db.create_tables([Profile, Competition, Application])
+        db.create_tables(
+            [Profile, Competition, Application, CompetitionFile, ApplicationFile]
+        )

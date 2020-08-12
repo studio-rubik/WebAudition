@@ -25,22 +25,18 @@ const ApplicationsSubmit: React.FC<any> = () => {
 
   const onFinish = async (values: any) => {
     if (competitionId == null) return;
-    const file = values.file[0].originFileObj;
+    const files = values.files.map((f: any) => f.originFileObj);
     setSending(true);
-    await repo.applicationPost(file, competitionId);
+    await repo.applicationPost(files, competitionId);
     message.success('Your application is sent!');
     history.push(`/competitions/${competitionId}`);
   };
 
   const normFile = (e: any) => {
-    switch (e.file.status) {
-      case 'uploading':
-        return [e.file];
-      case 'done':
-        return [e.file];
-      default:
-        return [];
+    if (Array.isArray(e)) {
+      return e;
     }
+    return e && e.fileList;
   };
 
   return (
@@ -52,7 +48,7 @@ const ApplicationsSubmit: React.FC<any> = () => {
     >
       <Form.Item label="Audio File">
         <Form.Item
-          name="file"
+          name="files"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           noStyle

@@ -23,11 +23,11 @@ export default class ServerRepository implements Repository {
       title: string;
       requirements: string;
     },
-    file: File,
+    files: File[],
   ): Promise<void> {
     const fd = new FormData();
     fd.append('json', JSON.stringify(data));
-    fd.append('minus_one', file);
+    files.forEach((f, i) => fd.append('file' + i, f));
     return this.client.post(
       {
         path: 'competitions',
@@ -46,9 +46,9 @@ export default class ServerRepository implements Repository {
     });
   }
 
-  applicationPost(file: File, competitionId: string): Promise<void> {
+  applicationPost(files: File[], competitionId: string): Promise<void> {
     const fd = new FormData();
-    fd.append('file', file);
+    files.forEach((f, i) => fd.append('file' + i, f));
     return this.client.post(
       {
         path: `competitions/${competitionId}/applications`,

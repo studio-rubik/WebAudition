@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Link, Switch, Route, useParams } from 'react-router-dom';
-import { List, Button, Row, Col, Typography, Divider, Spin } from 'antd';
+import { List, Card, Button, Row, Col, Typography, Spin, Collapse } from 'antd';
+import { DownloadOutlined } from '@ant-design/icons';
 import { useStore } from '../store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useAuth0 } from '../auth0';
 
 import * as domain from '../common/Domain';
-import { truncate, unique } from '../common/utils';
+import { unique } from '../common/utils';
 import useRepository from '../hooks/useRepository';
 import CompetitionsSubmit from './CompetitionsSubmit';
-import AudioPlayer from './AudioPlayer';
 
 const CompetitionsRoute: React.FC = () => {
   return (
@@ -67,11 +67,14 @@ const Competitions = () => {
             ...resp.data.competitions.allIds,
           ]),
         };
-        store.applications = {
-          byId: { ...store.applications.byId, ...resp.data.applications.byId },
+        store.competitionFiles = {
+          byId: {
+            ...store.competitionFiles.byId,
+            ...resp.data.competitionFiles.byId,
+          },
           allIds: unique([
-            ...store.applications.allIds,
-            ...resp.data.applications.allIds,
+            ...store.competitionFiles.allIds,
+            ...resp.data.competitionFiles.allIds,
           ]),
         };
       });
@@ -112,41 +115,53 @@ const Competitions = () => {
   ) : null;
 
   return (
-    <List
-      bordered
-      dataSource={compets}
-      loadMore={loadMore}
-      renderItem={(item: domain.Competition) => (
-        <ListItem>
-          <Link to={`/competitions/${item.id}`}>
-            <List.Item
-              actions={[<FontAwesomeIcon key="right" icon={faChevronRight} />]}
-            >
-              <List.Item.Meta
-                title={item.title}
-                description={truncate(item.requirements, 30)}
-              />
-            </List.Item>
-          </Link>
-        </ListItem>
-      )}
-      header={
-        <ListHeader>
-          <Typography.Title level={4}>
-            Would you play any below?
-          </Typography.Title>
-          {isAuthenticated ? (
-            <Button type="primary">
-              <Link to="/competitions/submit">Submit</Link>
-            </Button>
-          ) : (
-            <Button type="primary">
-              <Link to="/auth">Sign up to submit</Link>
-            </Button>
-          )}
-        </ListHeader>
-      }
-    />
+    <Row gutter={[0, 16]}>
+      <Col span={24}>
+        <Card>
+          <List
+            bordered
+            dataSource={compets}
+            loadMore={loadMore}
+            renderItem={(item: domain.Competition) => (
+              <ListItem>
+                <Link to={`/competitions/${item.id}`}>
+                  <List.Item
+                    actions={[
+                      <FontAwesomeIcon key="right" icon={faChevronRight} />,
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={item.title}
+                      description={
+                        <Typography.Paragraph ellipsis>
+                          {item.requirements}
+                        </Typography.Paragraph>
+                      }
+                    />
+                  </List.Item>
+                </Link>
+              </ListItem>
+            )}
+            header={
+              <ListHeader>
+                <Typography.Title level={4}>
+                  Would you play any below?
+                </Typography.Title>
+                {isAuthenticated ? (
+                  <Button type="primary">
+                    <Link to="/competitions/submit">Submit</Link>
+                  </Button>
+                ) : (
+                  <Button type="primary">
+                    <Link to="/auth">Sign up to submit</Link>
+                  </Button>
+                )}
+              </ListHeader>
+            }
+          />
+        </Card>
+      </Col>
+    </Row>
   );
 };
 
@@ -163,48 +178,53 @@ const ListHeader = styled.div`
 `;
 
 const CompetitionDetail: React.FC = () => {
-  const { isAuthenticated } = useAuth0();
-  const { id } = useParams();
-  const compet = useStore((store) => store.competitions.byId[id ?? '']);
-  const profile = useStore(
-    (store) => store.profiles.byId[compet?.profile ?? ''],
+  const { id: competId } = useParams();
+  const compet = useStore((store) => store.competitions.byId[competId ?? '']);
+  const competFiles = useStore((store) =>
+    store.competitionFiles.allIds
+      .map((fileId) => store.competitionFiles.byId[fileId])
+      .filter((file) => file.competition === competId),
   );
-  const appls = useStore((store) =>
-    store.applications.allIds
-      .map((id) => store.applications.byId[id])
-      .filter((a) => a.competition === compet.id),
+  const profiles = useStore((store) =>
+    store.profiles.allIds.map((profId) => store.profiles.byId[profId]),
   );
   const set = useStore((store) => store.set);
   const [loading, setLoading] = useState(true);
   const repo = useRepository();
 
   const fetchCompet = useCallback(async () => {
-    if (compet != null || id == null) return;
+    if (compet != null || competId == null) return;
     setLoading(true);
-    const resp = await repo.competitionGet(id);
+    const resp = await repo.competitionGet(competId);
     set((store) => {
       store.directEntry = true;
       store.profiles = {
         byId: { ...store.profiles.byId, ...resp.data.profiles.byId },
-        allIds: [...store.profiles.allIds, ...resp.data.profiles.allIds],
+        allIds: unique([
+          ...store.profiles.allIds,
+          ...resp.data.profiles.allIds,
+        ]),
       };
       store.competitions = {
         byId: { ...store.competitions.byId, ...resp.data.competitions.byId },
-        allIds: [
+        allIds: unique([
           ...store.competitions.allIds,
           ...resp.data.competitions.allIds,
-        ],
+        ]),
       };
-      store.applications = {
-        byId: { ...store.applications.byId, ...resp.data.applications.byId },
-        allIds: [
-          ...store.applications.allIds,
-          ...resp.data.applications.allIds,
-        ],
+      store.competitionFiles = {
+        byId: {
+          ...store.competitionFiles.byId,
+          ...resp.data.competitionFiles.byId,
+        },
+        allIds: unique([
+          ...store.competitionFiles.allIds,
+          ...resp.data.competitionFiles.allIds,
+        ]),
       };
     });
     setLoading(false);
-  }, [compet, id, repo, set]);
+  }, [compet, competId, repo, set]);
 
   useEffect(() => {
     if (compet == null) {
@@ -216,64 +236,68 @@ const CompetitionDetail: React.FC = () => {
 
   return !loading ? (
     <>
-      <Row justify="center">
-        <Col>
-          <Typography.Title level={2}>{compet.title}</Typography.Title>
-        </Col>
-      </Row>
-      <Row justify="end">
-        <Col>{profile.name}</Col>
-      </Row>
-      <Row justify="end">
-        <Col>{compet.updatedAt}</Col>
-      </Row>
-      <Divider />
-      <Row justify="center">
-        <AudioPlayer audioUrl={compet.minusOneUrl} />
-      </Row>
-      <Divider />
-      <Typography.Title level={3}>Requirements:</Typography.Title>
-      <Row justify="center">
-        <Col span={23}>
-          <Typography.Paragraph>{compet.requirements}</Typography.Paragraph>
-        </Col>
-      </Row>
-      <Divider />
-      <Row>
+      <Row gutter={[0, 16]}>
         <Col span={24}>
-          <List
-            bordered
-            pagination={{
-              onChange: (page) => {
-                console.log(page);
-              },
-              pageSize: 5,
-            }}
-            dataSource={appls}
-            renderItem={(item: domain.Application) => (
-              <List.Item
-                actions={[<span key="user">{`by ${profile.name}`}</span>]}
-              >
-                <AudioPlayer audioUrl={item.fileUrl} />
-              </List.Item>
-            )}
-            header={
-              <ListHeader>
-                <Typography.Title level={4}>Played tracks</Typography.Title>
-                {isAuthenticated ? (
-                  <Button type="primary">
-                    <Link to={`/applications/submit?for=${compet.id}`}>
-                      Submit
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button type="primary">
-                    <Link to="/auth">Sign up to submit</Link>
-                  </Button>
-                )}
-              </ListHeader>
+          <Card
+            title={
+              <div style={{ whiteSpace: 'normal' }}>
+                <Row>
+                  <Col>
+                    <Typography.Title level={4} style={{ marginBottom: 0 }}>
+                      {compet.title}
+                    </Typography.Title>
+                  </Col>
+                </Row>
+                <Row justify="end">
+                  <Col>
+                    <span style={{ fontSize: 14, fontWeight: 'normal' }}>
+                      {`by ${
+                        profiles.find((p) => p.userId === compet.userId)?.name
+                      }`}
+                    </span>
+                  </Col>
+                </Row>
+              </div>
             }
-          />
+          >
+            <Row gutter={[0, 24]}>
+              <Col span={24}>
+                <div style={{ whiteSpace: 'pre-line' }}>
+                  {compet.requirements}
+                </div>
+              </Col>
+            </Row>
+            <Row gutter={[0, 24]}>
+              <Col span={24}>
+                <List
+                  bordered
+                  size="small"
+                  dataSource={competFiles}
+                  header={
+                    <ListHeader>
+                      <strong>Files</strong>
+                    </ListHeader>
+                  }
+                  renderItem={(item: domain.CompetitionFile) => (
+                    <List.Item
+                      actions={[
+                        <a href={item.url} key="download">
+                          <DownloadOutlined />
+                        </a>,
+                      ]}
+                    >
+                      {item.key.split('/').pop()}
+                    </List.Item>
+                  )}
+                />
+              </Col>
+            </Row>
+            <Row gutter={[0, 12]} justify="center">
+              <Col>
+                <Button type="primary">Apply Now</Button>
+              </Col>
+            </Row>
+          </Card>
         </Col>
       </Row>
     </>

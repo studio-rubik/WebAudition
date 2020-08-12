@@ -18,7 +18,7 @@ export type APIResponseEntity<T> = {
 export type CompetitionsGetResp = {
   profiles: APIResponseEntity<Domain.Profile>;
   competitions: APIResponseEntity<Domain.Competition>;
-  applications: APIResponseEntity<Domain.Application>;
+  competitionFiles: APIResponseEntity<Domain.CompetitionFile>;
 };
 
 export default interface Repository {
@@ -34,7 +34,7 @@ export default interface Repository {
       title: string;
       requirements: string;
     },
-    file: File,
+    files: File[],
   ): Promise<void>;
-  applicationPost(file: File, competitionId: string): Promise<void>;
+  applicationPost(files: File[], competitionId: string): Promise<void>;
 }
