@@ -21,6 +21,14 @@ export type CompetitionsGetResp = {
   competitionFiles: APIResponseEntity<Domain.CompetitionFile>;
 };
 
+export type ReactionsGetResp = {
+  profiles: APIResponseEntity<Domain.Profile>;
+  competitions: APIResponseEntity<Domain.Competition>;
+  applications: APIResponseEntity<Domain.Application>;
+  competitionFiles: APIResponseEntity<Domain.CompetitionFile>;
+  applicationFiles: APIResponseEntity<Domain.ApplicationFile>;
+};
+
 export default interface Repository {
   setAuthToken(token: string | null): void;
   verifyEmailResend(): Promise<void>;
@@ -35,6 +43,14 @@ export default interface Repository {
       requirements: string;
     },
     files: File[],
+  ): Promise<{ competition: Domain.Competition }>;
+  applicationPost(
+    data: { contact: string },
+    files: File[],
+    competitionId: string,
   ): Promise<void>;
-  applicationPost(files: File[], competitionId: string): Promise<void>;
+  reactionsGet(
+    limit: number,
+    offset: number,
+  ): Promise<APIResponse<ReactionsGetResp>>;
 }

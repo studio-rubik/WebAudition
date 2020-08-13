@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Upload, message } from 'antd';
+import { Button, Form, Input, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
@@ -27,7 +27,11 @@ const ApplicationsSubmit: React.FC<any> = () => {
     if (competitionId == null) return;
     const files = values.files.map((f: any) => f.originFileObj);
     setSending(true);
-    await repo.applicationPost(files, competitionId);
+    await repo.applicationPost(
+      { contact: values.contact },
+      files,
+      competitionId,
+    );
     message.success('Your application is sent!');
     history.push(`/competitions/${competitionId}`);
   };
@@ -46,6 +50,9 @@ const ApplicationsSubmit: React.FC<any> = () => {
       onFinish={onFinish}
       validateMessages={validateMessages}
     >
+      <Form.Item name="contact" label="Contact" rules={[{ required: true }]}>
+        <Input placeholder="Email, Twitter ID, etc..." />
+      </Form.Item>
       <Form.Item label="Audio File">
         <Form.Item
           name="files"

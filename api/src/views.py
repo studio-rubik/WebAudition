@@ -36,7 +36,7 @@ def get_profile_by_user_id(id: str):
         return make_response(prof.to_dict(), 200)
 
 
-@app.route("/profiles/me", methods=["GET"])
+@app.route("/me/profiles", methods=["GET"])
 @require_auth
 def profile_me():
     get_profile_by_user_id(g.user.id)
@@ -155,17 +155,13 @@ def competition_get(id: str):
 
 @app.route("/competitions/<compet_id>/applications", methods=["POST"])
 @require_auth
-def applications_get(compet_id: str):
-    pass
-
-
-@app.route("/competitions/<compet_id>/applications", methods=["POST"])
-@require_auth
 def application_post(compet_id: str):
+    req = json.loads(request.form.get("json"))
+
     compet = models.Competition.get_by_id(compet_id)
     prof = models.Profile.get(models.Profile.user_id == g.user.id)
     appl = models.Application.create(
-        competition=compet, user_id=g.user.id, profile=prof,
+        competition=compet, contact=req.get("contact"), user_id=g.user.id, profile=prof,
     )
     for _, file in request.files.items():
         file_key = f"{appl.id}/{file.filename}"
@@ -173,3 +169,65 @@ def application_post(compet_id: str):
         storage.store_file(file, file_key, "applications")
 
     return {"application": appl.to_dict()}, 201
+
+
+@app.route("/reactions", methods=["GET"])
+@require_auth
+def reactions_get():
+    limit = int(request.args.get("limit"))
+    offset = int(request.args.get("offset"))
+
+    all_compets = (
+        models.Competition.select()
+        .where(models.Competition.user_id == g.user.id)
+        .order_by(models.Competition.created_at.desc())
+    )
+
+    total = all_compets.count()
+    has_more = total >= offset + limit + 1
+
+    compets_model = all_compets.limit(limit).offset(offset)
+    compets = [c.to_dict() for c in compets_model]
+
+    appls_model = (
+        models.Application.select()
+        .where(models.Application.competition.in_([c["id"] for c in compets]))
+        .order_by(models.Application.created_at.desc())
+    )
+    appls = [appl.to_dict() for appl in appls_model]
+
+    appl_files_nested = [
+        [
+            file.to_dict()
+            for file in appl.files.order_by(models.ApplicationFile.created_at.asc())
+        ]
+        for appl in appls_model
+    ]
+    appl_files = list(itertools.chain(*appl_files_nested))
+
+    compet_files_nested = [
+        [
+            file.to_dict()
+            for file in c.files.order_by(models.CompetitionFile.created_at.asc())
+        ]
+        for c in compets_model
+    ]
+    compet_files = list(itertools.chain(*compet_files_nested))
+
+    user_ids = set((data["user_id"] for data in compets))
+    profiles = [
+        p.to_dict()
+        for p in models.Profile.select().filter(models.Profile.user_id.in_(user_ids))
+    ]
+
+    return make_response(
+        data={
+            "competitions": Entity(compets).to_dict(),
+            "applications": Entity(appls).to_dict(),
+            "competition_files": Entity(compet_files).to_dict(),
+            "application_files": Entity(appl_files).to_dict(),
+            "profiles": Entity(profiles).to_dict(),
+        },
+        has_more=has_more,
+        status=200,
+    )

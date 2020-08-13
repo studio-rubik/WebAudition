@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export function mapEnumKeys<T, S>(
   E: T,
   callback: (n: number, i: number) => S,
@@ -18,3 +20,30 @@ export function truncate(str: string, len: number) {
 export function unique<T>(array: Array<T>) {
   return Array.from(new Set(array));
 }
+
+function toDate(utciso: string) {
+  return moment
+    .utc(utciso)
+    .local()
+    .format('YYYY-MM-DD');
+}
+
+function toDateTime(utciso: string) {
+  return moment
+    .utc(utciso)
+    .local()
+    .format('YYYY-MM-DD H:mm:ss Z');
+}
+
+function toRelative(utciso: string) {
+  return moment
+    .utc(utciso)
+    .local()
+    .fromNow();
+}
+
+export const fromUTC = {
+  toDate,
+  toDateTime,
+  toRelative,
+};

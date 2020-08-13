@@ -29,8 +29,8 @@ class BaseModel(Model):
         database = db
 
     id = UUIDField(primary_key=True, default=uuid.uuid4)
-    created_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
-    updated_at = DateTimeField(formats=[isoformat], default=datetime.datetime.now)
+    created_at = DateTimeField(formats=[isoformat], default=datetime.datetime.utcnow)
+    updated_at = DateTimeField(formats=[isoformat], default=datetime.datetime.utcnow)
 
     def to_dict(self):
         return model_to_dict(self, recurse=False)
@@ -51,6 +51,7 @@ class Competition(BaseModel):
 
 class Application(BaseModel):
     competition = ForeignKeyField(Competition, backref="applications")
+    contact = CharField()
     user_id = CharField()
     profile = ForeignKeyField(Profile)
 

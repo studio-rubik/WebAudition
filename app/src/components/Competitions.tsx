@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Link, Switch, Route, useParams } from 'react-router-dom';
 import { List, Card, Button, Row, Col, Typography, Spin, Collapse } from 'antd';
-import { DownloadOutlined } from '@ant-design/icons';
 import { useStore } from '../store';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -12,6 +11,7 @@ import * as domain from '../common/Domain';
 import { unique } from '../common/utils';
 import useRepository from '../hooks/useRepository';
 import CompetitionsSubmit from './CompetitionsSubmit';
+import FileList from './FileList';
 
 const CompetitionsRoute: React.FC = () => {
   return (
@@ -241,24 +241,14 @@ const CompetitionDetail: React.FC = () => {
           <Card
             title={
               <div style={{ whiteSpace: 'normal' }}>
-                <Row>
-                  <Col>
-                    <Typography.Title level={4} style={{ marginBottom: 0 }}>
-                      {compet.title}
-                    </Typography.Title>
-                  </Col>
-                </Row>
-                <Row justify="end">
-                  <Col>
-                    <span style={{ fontSize: 14, fontWeight: 'normal' }}>
-                      {`by ${
-                        profiles.find((p) => p.userId === compet.userId)?.name
-                      }`}
-                    </span>
-                  </Col>
-                </Row>
+                <Typography.Title level={4} style={{ marginBottom: 0 }}>
+                  {compet.title}
+                </Typography.Title>
               </div>
             }
+            extra={`by ${
+              profiles.find((p) => p.userId === compet.userId)?.name
+            }`}
           >
             <Row gutter={[0, 24]}>
               <Col span={24}>
@@ -269,32 +259,16 @@ const CompetitionDetail: React.FC = () => {
             </Row>
             <Row gutter={[0, 24]}>
               <Col span={24}>
-                <List
-                  bordered
-                  size="small"
-                  dataSource={competFiles}
-                  header={
-                    <ListHeader>
-                      <strong>Files</strong>
-                    </ListHeader>
-                  }
-                  renderItem={(item: domain.CompetitionFile) => (
-                    <List.Item
-                      actions={[
-                        <a href={item.url} key="download">
-                          <DownloadOutlined />
-                        </a>,
-                      ]}
-                    >
-                      {item.key.split('/').pop()}
-                    </List.Item>
-                  )}
-                />
+                <FileList files={competFiles} />
               </Col>
             </Row>
             <Row gutter={[0, 12]} justify="center">
               <Col>
-                <Button type="primary">Apply Now</Button>
+                <Button type="primary">
+                  <Link to={`/applications/submit?for=${compet.id}`}>
+                    Apply
+                  </Link>
+                </Button>
               </Col>
             </Row>
           </Card>

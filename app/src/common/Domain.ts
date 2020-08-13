@@ -30,6 +30,7 @@ export type Application = {
   updatedAt: string;
   userId: string;
   profile: string;
+  contact: string;
 } & Base;
 
 export type File = {

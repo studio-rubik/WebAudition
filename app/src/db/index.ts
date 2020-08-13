@@ -2,7 +2,9 @@ import Http from './http';
 import Repository, {
   APIResponse,
   CompetitionsGetResp,
+  ReactionsGetResp,
 } from '../interface/repository';
+import * as domain from '../common/Domain';
 
 export default class ServerRepository implements Repository {
   client: Http;
@@ -24,7 +26,7 @@ export default class ServerRepository implements Repository {
       requirements: string;
     },
     files: File[],
-  ): Promise<void> {
+  ): Promise<{ competition: domain.Competition }> {
     const fd = new FormData();
     fd.append('json', JSON.stringify(data));
     files.forEach((f, i) => fd.append('file' + i, f));
@@ -46,8 +48,13 @@ export default class ServerRepository implements Repository {
     });
   }
 
-  applicationPost(files: File[], competitionId: string): Promise<void> {
+  applicationPost(
+    data: { contact: string },
+    files: File[],
+    competitionId: string,
+  ): Promise<void> {
     const fd = new FormData();
+    fd.append('json', JSON.stringify(data));
     files.forEach((f, i) => fd.append('file' + i, f));
     return this.client.post(
       {
@@ -55,6 +62,13 @@ export default class ServerRepository implements Repository {
       },
       fd,
     );
+  }
+
+  reactionsGet(
+    limit: number,
+    offset: number,
+  ): Promise<APIResponse<ReactionsGetResp>> {
+    return this.client.get({ path: 'reactions', queries: { limit, offset } });
   }
 
   setAuthToken(token: string | null) {

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Button, Form, Input, Upload } from 'antd';
+import { Button, Form, Input, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
+import { useHistory } from 'react-router-dom';
 
 import useRepository from '../hooks/useRepository';
 
@@ -16,6 +17,7 @@ const dummyRequest = ({ file, onSuccess }: { file: File; onSuccess: any }) => {
 
 const CompetitionsSubmit: React.FC = () => {
   const repo = useRepository();
+  const history = useHistory();
 
   const onFinish = async (values: any) => {
     const data = {
@@ -23,7 +25,9 @@ const CompetitionsSubmit: React.FC = () => {
       requirements: values.requirements,
     };
     const files = values.files.map((f: any) => f.originFileObj);
-    await repo.competitionPost(data, files);
+    const resp = await repo.competitionPost(data, files);
+    message.success('You published an audition!');
+    history.push(`/competitions/${resp.competition.id}`);
   };
 
   const normFile = (e: any) => {
