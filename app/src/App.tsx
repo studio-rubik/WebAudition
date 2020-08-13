@@ -1,4 +1,5 @@
 import React from 'react';
+import './App.less';
 import styled from 'styled-components';
 import { Link, Switch, Route } from 'react-router-dom';
 import Helmet from 'react-helmet';
@@ -20,9 +21,16 @@ function App() {
     <>
       <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
       <Layout>
-        <Header style={{ padding: '0 10px', background: 'white' }}>
+        <Header
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '0 10px',
+            background: 'white',
+          }}
+        >
           <Logo>
-            <Link to="/">WouldYouPlay?</Link>
+            <StyledLink to="/">WebAudition</StyledLink>
           </Logo>
           <HeaderMenu>
             <HeaderMenuItem>
@@ -72,10 +80,24 @@ const Container = styled.div`
 
 const Logo = styled.div`
   width: 120px;
-  height: 30px;
-  line-height: 30px;
-  margin: 16px 24px 16px 0;
-  float: left;
+  height: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+`;
+
+const StyledLink = styled(Link)`
+  display: inline-block;
+  text-decoration: none;
+  color: #34a0d1;
+
+  &:focus,
+  &:hover,
+  &:visited,
+  &:link,
+  &:active {
+    text-decoration: none;
+  }
 `;
 
 const HeaderMenu = styled.div`

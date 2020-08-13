@@ -7,8 +7,6 @@ import Applications from './Applications';
 import Reactions from './Reactions';
 
 const Main = () => {
-  const { isAuthenticated, user } = useAuth0();
-
   return (
     <>
       <Switch>
