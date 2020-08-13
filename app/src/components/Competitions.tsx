@@ -194,12 +194,12 @@ const CompetitionDetail: React.FC = () => {
   const comments = useStore((store) =>
     store.competitionComments.allIds
       .map((id) => store.competitionComments.byId[id])
-      .filter((comment) => comment.competition === compet.id),
+      .filter((comment) => comment.competition === compet?.id),
   );
   const competFiles = useStore((store) =>
     store.competitionFiles.allIds
       .map((fileId) => store.competitionFiles.byId[fileId])
-      .filter((file) => file.competition === competId),
+      .filter((file) => file.competition === compet?.id),
   );
   const profiles = useStore((store) =>
     store.profiles.allIds.map((profId) => store.profiles.byId[profId]),

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, Form, Input, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
@@ -18,6 +18,7 @@ const dummyRequest = ({ file, onSuccess }: { file: File; onSuccess: any }) => {
 const CompetitionsSubmit: React.FC = () => {
   const repo = useRepository();
   const history = useHistory();
+  const [sending, setSending] = useState(false);
 
   const onFinish = async (values: any) => {
     const data = {
@@ -25,9 +26,16 @@ const CompetitionsSubmit: React.FC = () => {
       requirements: values.requirements,
     };
     const files = values.files.map((f: any) => f.originFileObj);
-    const resp = await repo.competitionPost(data, files);
-    message.success('You published an audition!');
-    history.push(`/competitions/${resp.competition.id}`);
+    setSending(true);
+    try {
+      const resp = await repo.competitionPost(data, files);
+      message.success('You published an audition!');
+      history.push(`/competitions/${resp.competition.id}`);
+    } catch {
+      message.error('Something went wrong.');
+    } finally {
+      setSending(false);
+    }
   };
 
   const normFile = (e: any) => {
@@ -74,7 +82,12 @@ const CompetitionsSubmit: React.FC = () => {
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button type="primary" htmlType="submit">
+        <Button
+          disabled={sending}
+          loading={sending}
+          type="primary"
+          htmlType="submit"
+        >
           Submit
         </Button>
       </Form.Item>
