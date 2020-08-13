@@ -155,9 +155,7 @@ const Competitions = () => {
             )}
             header={
               <ListHeader>
-                <Typography.Title level={4}>
-                  Would you play any below?
-                </Typography.Title>
+                <Typography.Title level={4}>Auditions</Typography.Title>
                 {isAuthenticated ? (
                   <Button type="primary">
                     <Link to="/competitions/submit">Submit</Link>

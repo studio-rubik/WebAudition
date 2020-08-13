@@ -25,7 +25,8 @@ const CompetitionsSubmit: React.FC = () => {
       title: values.title,
       requirements: values.requirements,
     };
-    const files = values.files.map((f: any) => f.originFileObj);
+    const files =
+      values.files != null ? values.files.map((f: any) => f.originFileObj) : [];
     setSending(true);
     try {
       const resp = await repo.competitionPost(data, files);
@@ -60,24 +61,25 @@ const CompetitionsSubmit: React.FC = () => {
         label="Requirements"
         rules={[{ required: true }]}
       >
-        <Input.TextArea />
+        <Input.TextArea
+          rows={10}
+          placeholder="Describe what you expect from your auditionees."
+        />
       </Form.Item>
-      <Form.Item label="Minus one track">
+      <Form.Item label="Files">
         <Form.Item
           name="files"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           noStyle
-          rules={[{ required: true }]}
         >
           <Upload.Dragger name="files" customRequest={dummyRequest}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">
-              Click or drag file to this area to upload.
+            <p className="ant-upload-hint">
+              Upload anything that helps your audition
             </p>
-            <p className="ant-upload-hint">wav, mp3, m4a</p>
           </Upload.Dragger>
         </Form.Item>
       </Form.Item>
