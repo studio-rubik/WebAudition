@@ -189,6 +189,7 @@ const ListHeader = styled.div`
 `;
 
 const CompetitionDetail: React.FC = () => {
+  const { isAuthenticated } = useAuth0();
   const { id: competId } = useParams();
   const compet = useStore((store) => store.competitions.byId[competId ?? '']);
   const comments = useStore((store) =>
@@ -293,9 +294,13 @@ const CompetitionDetail: React.FC = () => {
             <Row gutter={[0, 12]} justify="center">
               <Col>
                 <Button type="primary">
-                  <Link to={`/applications/submit?for=${compet.id}`}>
-                    Apply
-                  </Link>
+                  {isAuthenticated ? (
+                    <Link to={`/applications/submit?for=${compet.id}`}>
+                      Apply
+                    </Link>
+                  ) : (
+                    <Link to={`/auth`}>Sign up to apply</Link>
+                  )}
                 </Button>
               </Col>
             </Row>

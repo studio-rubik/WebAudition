@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -13,6 +14,7 @@ import {
   message,
 } from 'antd';
 
+import { useAuth0 } from '../auth0';
 import { fromUTC } from '../common/utils';
 import * as domain from '../common/Domain';
 import useRepository from '../hooks/useRepository';
@@ -33,6 +35,7 @@ const CompetitionComments: React.FC<Props> = ({
   comments,
   profiles,
 }) => {
+  const { isAuthenticated } = useAuth0();
   const repo = useRepository();
   const set = useStore((store) => store.set);
   const [sending, setSending] = useState(false);
@@ -93,34 +96,40 @@ const CompetitionComments: React.FC<Props> = ({
             />
           </Col>
         </Row>
-        <Row gutter={[0, 24]}>
-          <Col span={24}>
-            <Form
-              layout="vertical"
-              name="competition"
-              onFinish={onFinish}
-              validateMessages={validateMessages}
-            >
-              <Form.Item
-                name="comment"
-                label="Leave a comment"
-                rules={[{ required: true }]}
+        {isAuthenticated ? (
+          <Row gutter={[0, 24]}>
+            <Col span={24}>
+              <Form
+                layout="vertical"
+                name="competition"
+                onFinish={onFinish}
+                validateMessages={validateMessages}
               >
-                <Input.TextArea rows={5} />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={sending}
-                  loading={sending}
+                <Form.Item
+                  name="comment"
+                  label="Leave a comment"
+                  rules={[{ required: true }]}
                 >
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
-          </Col>
-        </Row>
+                  <Input.TextArea rows={5} />
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={sending}
+                    loading={sending}
+                  >
+                    Send
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Col>
+          </Row>
+        ) : (
+          <Button type="primary">
+            <Link to="/auth">Sign up to comment</Link>
+          </Button>
+        )}
       </Card>
     </>
   );
