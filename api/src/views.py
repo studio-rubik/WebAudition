@@ -108,6 +108,17 @@ def competitions_get():
     ]
     compet_files = list(itertools.chain(*compet_files_nested))
 
+    comments_nested = [
+        [
+            comment.to_dict()
+            for comment in c.comments.order_by(
+                models.CompetitionComment.updated_at.asc()
+            )
+        ]
+        for c in compets_model
+    ]
+    comments = list(itertools.chain(*comments_nested))
+
     user_ids = set((data["user_id"] for data in compets))
     profiles = [
         p.to_dict()
@@ -117,6 +128,7 @@ def competitions_get():
     return make_response(
         data={
             "competitions": Entity(compets).to_dict(),
+            "competition_comments": Entity(comments).to_dict(),
             "competition_files": Entity(compet_files).to_dict(),
             "profiles": Entity(profiles).to_dict(),
         },
@@ -139,18 +151,41 @@ def competition_get(id: str):
         for file in compet_model.files.order_by(models.CompetitionFile.updated_at.asc())
     ]
 
+    comments = [
+        file.to_dict()
+        for file in compet_model.comments.order_by(
+            models.CompetitionComment.updated_at.asc()
+        )
+    ]
+
     prof_model = models.Profile.get_by_id(compet.get("profile"))
     prof = prof_model.to_dict()
 
     return make_response(
         data={
             "competitions": Entity([compet]).to_dict(),
+            "competition_comments": Entity(comments).to_dict(),
             "competition_files": Entity(compet_files).to_dict(),
             "profiles": Entity([prof]).to_dict(),
         },
         has_more=False,
         status=200,
     )
+
+
+@app.route("/competitions/<compet_id>/comments", methods=["POST"])
+@require_auth
+def comment_post(compet_id: str):
+    req = request.get_json()
+    content = req.get("content")
+
+    compet = models.Competition.get_by_id(compet_id)
+
+    comment = models.CompetitionComment.create(
+        competition=compet, content=content, user_id=g.user.id
+    )
+
+    return comment.to_dict(), 201
 
 
 @app.route("/competitions/<compet_id>/applications", methods=["POST"])

@@ -23,6 +23,12 @@ export type Competition = {
   profile: string;
 } & Base;
 
+export type CompetitionComment = {
+  competition: string;
+  content: string;
+  userId: string;
+} & Base;
+
 export type Application = {
   id: string;
   competition: string;

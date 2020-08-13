@@ -11,6 +11,7 @@ import * as domain from '../common/Domain';
 import { unique } from '../common/utils';
 import useRepository from '../hooks/useRepository';
 import CompetitionsSubmit from './CompetitionsSubmit';
+import CompetitionComments from './CompetitionComments';
 import FileList from './FileList';
 
 const CompetitionsRoute: React.FC = () => {
@@ -65,6 +66,16 @@ const Competitions = () => {
           allIds: unique([
             ...store.competitions.allIds,
             ...resp.data.competitions.allIds,
+          ]),
+        };
+        store.competitionComments = {
+          byId: {
+            ...store.competitionComments.byId,
+            ...resp.data.competitionComments.byId,
+          },
+          allIds: unique([
+            ...store.competitionComments.allIds,
+            ...resp.data.competitionComments.allIds,
           ]),
         };
         store.competitionFiles = {
@@ -180,6 +191,11 @@ const ListHeader = styled.div`
 const CompetitionDetail: React.FC = () => {
   const { id: competId } = useParams();
   const compet = useStore((store) => store.competitions.byId[competId ?? '']);
+  const comments = useStore((store) =>
+    store.competitionComments.allIds
+      .map((id) => store.competitionComments.byId[id])
+      .filter((comment) => comment.competition === compet.id),
+  );
   const competFiles = useStore((store) =>
     store.competitionFiles.allIds
       .map((fileId) => store.competitionFiles.byId[fileId])
@@ -212,6 +228,16 @@ const CompetitionDetail: React.FC = () => {
           ...resp.data.competitions.allIds,
         ]),
       };
+      store.competitionComments = {
+        byId: {
+          ...store.competitionComments.byId,
+          ...resp.data.competitionComments.byId,
+        },
+        allIds: unique([
+          ...store.competitionComments.allIds,
+          ...resp.data.competitionComments.allIds,
+        ]),
+      };
       store.competitionFiles = {
         byId: {
           ...store.competitionFiles.byId,
@@ -233,6 +259,8 @@ const CompetitionDetail: React.FC = () => {
       setLoading(false);
     }
   }, [compet, fetchCompet]);
+
+  console.log(competFiles);
 
   return !loading ? (
     <>
@@ -272,6 +300,15 @@ const CompetitionDetail: React.FC = () => {
               </Col>
             </Row>
           </Card>
+        </Col>
+      </Row>
+      <Row gutter={[0, 16]}>
+        <Col span={24}>
+          <CompetitionComments
+            competitionId={compet.id}
+            comments={comments}
+            profiles={profiles}
+          />
         </Col>
       </Row>
     </>

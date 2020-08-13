@@ -49,6 +49,12 @@ class Competition(BaseModel):
     profile = ForeignKeyField(Profile)
 
 
+class CompetitionComment(BaseModel):
+    competition = ForeignKeyField(Competition, backref="comments")
+    content = TextField()
+    user_id = CharField()
+
+
 class Application(BaseModel):
     competition = ForeignKeyField(Competition, backref="applications")
     contact = CharField()
@@ -86,5 +92,12 @@ class ApplicationFile(File):
 def create_tables():
     with db:
         db.create_tables(
-            [Profile, Competition, Application, CompetitionFile, ApplicationFile]
+            [
+                Profile,
+                Competition,
+                Application,
+                CompetitionComment,
+                CompetitionFile,
+                ApplicationFile,
+            ]
         )

@@ -10,6 +10,7 @@ export type State = {
   directEntry: boolean;
   profiles: APIResponseEntity<domain.Profile>;
   competitions: APIResponseEntity<domain.Competition>;
+  competitionComments: APIResponseEntity<domain.CompetitionComment>;
   competitionFiles: APIResponseEntity<domain.CompetitionFile>;
   applications: APIResponseEntity<domain.Application>;
   applicationFiles: APIResponseEntity<domain.ApplicationFile>;
@@ -22,6 +23,7 @@ const emptyEntity = { byId: {}, allIds: [] };
 const initialState = {
   profiles: emptyEntity,
   competitions: emptyEntity,
+  competitionComments: emptyEntity,
   competitionFiles: emptyEntity,
   applications: emptyEntity,
   applicationFiles: emptyEntity,

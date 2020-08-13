@@ -38,6 +38,20 @@ export default class ServerRepository implements Repository {
     );
   }
 
+  competitionCommentPost(
+    data: {
+      content: string;
+    },
+    competitionId: string,
+  ): Promise<domain.CompetitionComment> {
+    return this.client.post(
+      {
+        path: `competitions/${competitionId}/comments`,
+      },
+      data,
+    );
+  }
+
   competitionsGet(
     limit: number,
     offset: number,
