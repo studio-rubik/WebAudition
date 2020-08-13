@@ -33,6 +33,7 @@ export type ReactionsGetResp = {
 export default interface Repository {
   setAuthToken(token: string | null): void;
   verifyEmailResend(): Promise<void>;
+  myProfileGet(): Promise<Domain.Profile>;
   competitionGet(id: string): Promise<APIResponse<CompetitionsGetResp>>;
   competitionsGet(
     limit: number,

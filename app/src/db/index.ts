@@ -16,6 +16,10 @@ export default class ServerRepository implements Repository {
     throw new Error('Method not implemented.');
   }
 
+  myProfileGet(): Promise<domain.Profile> {
+    return this.client.get({ path: 'me/profile' });
+  }
+
   competitionGet(id: string): Promise<APIResponse<CompetitionsGetResp>> {
     return this.client.get({ path: 'competitions/:id', params: [id] });
   }

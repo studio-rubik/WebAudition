@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.less';
 import styled from 'styled-components';
 import { Link, Switch, Route } from 'react-router-dom';
@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInbox } from '@fortawesome/free-solid-svg-icons';
 
 import { useAuth0 } from './auth0';
+import { useStore } from './store';
+import useRepository from './hooks/useRepository';
 import Auth from './components/Auth';
 import Main from './components/Main';
 import GlobalActions from './components/GlobalActions';
@@ -16,6 +18,19 @@ const { Header, Content, Footer } = Layout;
 
 function App() {
   const { isAuthenticated } = useAuth0();
+  const repo = useRepository();
+  const set = useStore((store) => store.set);
+
+  useEffect(() => {
+    async function fn() {
+      const prof = await repo.myProfileGet();
+      set((store) => {
+        store.profiles.byId[prof.id] = prof;
+        store.profiles.allIds.push(prof.id);
+      });
+    }
+    fn();
+  });
 
   return (
     <>
@@ -33,13 +48,15 @@ function App() {
             <StyledLink to="/">WebAudition</StyledLink>
           </Logo>
           <HeaderMenu>
-            <HeaderMenuItem>
-              <Button>
-                <Link to="/reactions">
-                  <FontAwesomeIcon icon={faInbox} size="lg" />
-                </Link>
-              </Button>
-            </HeaderMenuItem>
+            {isAuthenticated ? (
+              <HeaderMenuItem>
+                <Button>
+                  <Link to="/reactions">
+                    <FontAwesomeIcon icon={faInbox} size="lg" />
+                  </Link>
+                </Button>
+              </HeaderMenuItem>
+            ) : null}
             <HeaderMenuItem>
               {isAuthenticated ? (
                 <GlobalActions />
