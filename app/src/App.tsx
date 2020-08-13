@@ -2,25 +2,16 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link, Switch, Route } from 'react-router-dom';
 import Helmet from 'react-helmet';
-import { Layout, Menu, Button } from 'antd';
+import { Layout, Button } from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInbox } from '@fortawesome/free-solid-svg-icons';
 
 import { useAuth0 } from './auth0';
 import Auth from './components/Auth';
 import Main from './components/Main';
 import GlobalActions from './components/GlobalActions';
-import { CSSProperties } from 'styled-components';
 
 const { Header, Content, Footer } = Layout;
-const centerStyle: CSSProperties = {
-  position: 'relative',
-  display: 'flex',
-};
-const rightStyle: CSSProperties = {
-  paddingRight: 12,
-  position: 'absolute',
-  top: 0,
-  right: 0,
-};
 
 function App() {
   const { isAuthenticated } = useAuth0();
@@ -29,17 +20,19 @@ function App() {
     <>
       <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
       <Layout>
-        <Header style={{ background: 'white' }}>
+        <Header style={{ padding: '0 10px', background: 'white' }}>
           <Logo>
             <Link to="/">WouldYouPlay?</Link>
           </Logo>
-          <div>
-            <Menu
-              selectable={false}
-              mode="horizontal"
-              style={centerStyle}
-            ></Menu>
-            <div style={rightStyle}>
+          <HeaderMenu>
+            <HeaderMenuItem>
+              <Button>
+                <Link to="/reactions">
+                  <FontAwesomeIcon icon={faInbox} size="lg" />
+                </Link>
+              </Button>
+            </HeaderMenuItem>
+            <HeaderMenuItem>
               {isAuthenticated ? (
                 <GlobalActions />
               ) : (
@@ -47,8 +40,8 @@ function App() {
                   <Link to="/auth">Log in | Sign up</Link>
                 </Button>
               )}
-            </div>
-          </div>
+            </HeaderMenuItem>
+          </HeaderMenu>
         </Header>
         <Content>
           <Container>
@@ -83,6 +76,17 @@ const Logo = styled.div`
   line-height: 30px;
   margin: 16px 24px 16px 0;
   float: left;
+`;
+
+const HeaderMenu = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+`;
+
+const HeaderMenuItem = styled.div`
+  padding: 0 8px;
 `;
 
 export default App;
