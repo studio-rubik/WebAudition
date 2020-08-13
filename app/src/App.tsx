@@ -19,7 +19,7 @@ function App() {
 
   return (
     <>
-      <Helmet titleTemplate="%s - WouldYouPlay" defaultTitle="WouldYouPlay" />
+      <Helmet titleTemplate="%s - WebAudition" defaultTitle="WebAudition" />
       <Layout>
         <Header
           style={{
