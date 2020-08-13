@@ -16,8 +16,9 @@ def after_signup():
     req = request.get_json()
     user = req.get("user")
     user_id = user.get("user_id")
-    name = user.get("name")
-    avatar = user.get("picture")
+    meta = user.get("user_metadata")
+    name = meta.get("name")
+    avatar = f"https://avatars.dicebear.com/api/identicon/{user_id}.svg"
 
     try:
         models.Profile.create(user_id=user_id, name=name, avatar=avatar)
@@ -36,7 +37,7 @@ def get_profile_by_user_id(id: str):
         return make_response(prof.to_dict(), 200)
 
 
-@app.route("/me/profiles", methods=["GET"])
+@app.route("/me/profile", methods=["GET"])
 @require_auth
 def profile_me():
     get_profile_by_user_id(g.user.id)
@@ -119,7 +120,7 @@ def competitions_get():
     ]
     comments = list(itertools.chain(*comments_nested))
 
-    user_ids = set((data["user_id"] for data in compets))
+    user_ids = set((data["user_id"] for data in (*compets, *comments)))
     profiles = [
         p.to_dict()
         for p in models.Profile.select().filter(models.Profile.user_id.in_(user_ids))
@@ -158,15 +159,18 @@ def competition_get(id: str):
         )
     ]
 
-    prof_model = models.Profile.get_by_id(compet.get("profile"))
-    prof = prof_model.to_dict()
+    profs_model = models.Profile.select().filter(
+        (models.Profile.user_id == compet.get("profile"))
+        | (models.Profile.user_id.in_([c.get("user_id") for c in comments]))
+    )
+    profs = [p.to_dict() for p in profs_model]
 
     return make_response(
         data={
             "competitions": Entity([compet]).to_dict(),
             "competition_comments": Entity(comments).to_dict(),
             "competition_files": Entity(compet_files).to_dict(),
-            "profiles": Entity([prof]).to_dict(),
+            "profiles": Entity(profs).to_dict(),
         },
         has_more=False,
         status=200,
