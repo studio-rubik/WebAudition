@@ -85,8 +85,7 @@ const CompetitionComments: React.FC<Props> = ({
                       profiles.find((prof) => prof.userId === item.userId)
                         ?.avatar
                     }
-                    // actions={item.actions}
-                    content={item.content}
+                    content={<p>{item.content}</p>}
                     datetime={fromUTC.toRelative(item.updatedAt)}
                   />
                 </List.Item>
