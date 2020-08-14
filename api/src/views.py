@@ -34,18 +34,18 @@ def get_profile_by_user_id(id: str):
     except models.Profile.DoesNotExist:
         abort(404)
     else:
-        return make_response(prof.to_dict(), 200)
+        return prof.to_dict(), 200
 
 
 @app.route("/me/profile", methods=["GET"])
 @require_auth
 def profile_me():
-    get_profile_by_user_id(g.user.id)
+    return get_profile_by_user_id(g.user.id)
 
 
 @app.route("/profiles/<user_id>", methods=["GET"])
 def profile_get(user_id):
-    get_profile_by_user_id(user_id)
+    return get_profile_by_user_id(user_id)
 
 
 def extract_extension(filename: str):
