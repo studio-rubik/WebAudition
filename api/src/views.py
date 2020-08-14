@@ -253,7 +253,7 @@ def reactions_get():
     ]
     compet_files = list(itertools.chain(*compet_files_nested))
 
-    user_ids = set((data["user_id"] for data in compets))
+    user_ids = set((data["user_id"] for data in appls))
     profiles = [
         p.to_dict()
         for p in models.Profile.select().filter(models.Profile.user_id.in_(user_ids))
