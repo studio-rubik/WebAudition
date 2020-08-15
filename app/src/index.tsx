@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactGA from 'react-ga';
 
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -17,6 +18,9 @@ if (
 ) {
   throw Error('Some environment variable(s) is(are) missing');
 }
+
+ReactGA.initialize('UA-128111595-4');
+ReactGA.pageview(window.location.pathname + window.location.search);
 
 const onRedirectCallback = (appState: any) => {
   history.push(
