@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
+import styled from 'styled-components';
 import createAuth0Client from '@auth0/auth0-spa-js';
 import Auth0Client from '@auth0/auth0-spa-js/dist/typings/Auth0Client';
+import { Spin } from 'antd';
 
 import { User } from '../common/Domain';
 
@@ -111,7 +113,21 @@ export const Auth0Provider = ({
         logout: (o: LogoutOptions | undefined) => auth0Client!.logout(o),
       }}
     >
-      {loading ? 'loading' : children}
+      {loading ? (
+        <LoadingScreen>
+          <Spin />
+        </LoadingScreen>
+      ) : (
+        children
+      )}
     </Auth0Context.Provider>
   );
 };
+
+const LoadingScreen = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
