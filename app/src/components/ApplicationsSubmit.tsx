@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { Button, Form, Input, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router';
@@ -53,37 +54,39 @@ const ApplicationsSubmit: React.FC<any> = () => {
       <Form.Item name="contact" label="Contact" rules={[{ required: true }]}>
         <Input placeholder="Email, Twitter ID, etc..." />
       </Form.Item>
-      <Form.Item label="Audio File">
+      <Form.Item label="Files">
         <Form.Item
           name="files"
           valuePropName="fileList"
           getValueFromEvent={normFile}
           noStyle
-          rules={[{ required: true }]}
         >
           <Upload.Dragger name="files" customRequest={dummyRequest}>
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-text">
-              Click or drag file to this area to upload.
-            </p>
-            <p className="ant-upload-hint">wav, mp3, m4a</p>
+            <p className="ant-upload-hint">Up to 500MB totally</p>
           </Upload.Dragger>
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          disabled={sending}
-          loading={sending}
-        >
-          Submit
-        </Button>
+        <TextAlignCenter>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={sending}
+            loading={sending}
+          >
+            Submit
+          </Button>
+        </TextAlignCenter>
       </Form.Item>
     </Form>
   );
 };
+
+const TextAlignCenter = styled.div`
+  text-align: center;
+`;
 
 export default ApplicationsSubmit;
