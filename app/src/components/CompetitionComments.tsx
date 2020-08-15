@@ -107,7 +107,7 @@ const CompetitionComments: React.FC<Props> = ({
               >
                 <Form.Item
                   name="comment"
-                  label="Leave a comment"
+                  label="Comment"
                   rules={[{ required: true }]}
                 >
                   <Input.TextArea rows={5} />
