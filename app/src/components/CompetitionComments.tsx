@@ -96,9 +96,9 @@ const CompetitionComments: React.FC<Props> = ({
             />
           </Col>
         </Row>
-        {isAuthenticated ? (
-          <Row gutter={[0, 24]}>
-            <Col span={24}>
+        <Row gutter={[0, 24]}>
+          <Col span={24}>
+            {isAuthenticated ? (
               <Form
                 layout="vertical"
                 name="competition"
@@ -113,23 +113,27 @@ const CompetitionComments: React.FC<Props> = ({
                   <Input.TextArea rows={5} />
                 </Form.Item>
                 <Form.Item>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={sending}
-                    loading={sending}
-                  >
-                    Send
-                  </Button>
+                  <TextAlignCenter>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      disabled={sending}
+                      loading={sending}
+                    >
+                      Send
+                    </Button>
+                  </TextAlignCenter>
                 </Form.Item>
               </Form>
-            </Col>
-          </Row>
-        ) : (
-          <Button type="primary">
-            <Link to="/auth">Sign up to comment</Link>
-          </Button>
-        )}
+            ) : (
+              <TextAlignCenter>
+                <Button type="primary">
+                  <Link to="/auth">Sign up to comment</Link>
+                </Button>
+              </TextAlignCenter>
+            )}
+          </Col>
+        </Row>
       </Card>
     </>
   );
@@ -138,6 +142,10 @@ const CompetitionComments: React.FC<Props> = ({
 const ListHeader = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const TextAlignCenter = styled.div`
+  text-align: center;
 `;
 
 export default CompetitionComments;

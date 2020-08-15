@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { Button, Form, Input, Upload, message } from 'antd';
 import { InboxOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
@@ -63,7 +64,7 @@ const CompetitionsSubmit: React.FC = () => {
       >
         <Input.TextArea
           rows={10}
-          placeholder="Describe what you expect from your auditionees."
+          placeholder="Describe what you expect from your auditionees"
         />
       </Form.Item>
       <Form.Item label="Files">
@@ -77,24 +78,28 @@ const CompetitionsSubmit: React.FC = () => {
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-hint">
-              Upload anything that helps your audition
-            </p>
+            <p className="ant-upload-hint">Up to 500MB totally</p>
           </Upload.Dragger>
         </Form.Item>
       </Form.Item>
       <Form.Item>
-        <Button
-          disabled={sending}
-          loading={sending}
-          type="primary"
-          htmlType="submit"
-        >
-          Submit
-        </Button>
+        <TextAlignCenter>
+          <Button
+            disabled={sending}
+            loading={sending}
+            type="primary"
+            htmlType="submit"
+          >
+            Submit
+          </Button>
+        </TextAlignCenter>
       </Form.Item>
     </Form>
   );
 };
+
+const TextAlignCenter = styled.div`
+  text-align: center;
+`;
 
 export default CompetitionsSubmit;
