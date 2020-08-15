@@ -26,7 +26,8 @@ const ApplicationsSubmit: React.FC<any> = () => {
 
   const onFinish = async (values: any) => {
     if (competitionId == null) return;
-    const files = values.files.map((f: any) => f.originFileObj);
+    const files =
+      values.files != null ? values.files.map((f: any) => f.originFileObj) : [];
     setSending(true);
     await repo.applicationPost(
       { contact: values.contact },
