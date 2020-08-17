@@ -66,7 +66,7 @@ const ApplicationsSubmit: React.FC<any> = () => {
             <p className="ant-upload-drag-icon">
               <InboxOutlined />
             </p>
-            <p className="ant-upload-hint">Up to 500MB totally</p>
+            <p className="ant-upload-hint">Up to 500MB in total</p>
           </Upload.Dragger>
         </Form.Item>
       </Form.Item>
